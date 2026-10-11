@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.postgres/
+.pg-password
+.env
+.env.*
+test-results/
+*.tsbuildinfo
+*.dump
+*.sql.gz

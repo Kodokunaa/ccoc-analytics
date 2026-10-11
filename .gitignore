@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.vercel/
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.tsbuildinfo
+test-results/
+.postgres/
+.pg-password

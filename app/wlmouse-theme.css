@@ -1,0 +1,560 @@
+/* Design adapted from the local wlmouse-cms admin interface. */
+:root {
+  --accent: #111;
+  --dark: #181818;
+  --muted: #666;
+  --border: #ececec;
+  --background: #f7f7f7;
+  --secondary: #888;
+}
+body {
+  color: #181818;
+  font-synthesis: none;
+}
+button,
+input,
+select {
+  border-radius: 4px;
+}
+button:hover {
+  background: #f5f5f5;
+}
+input,
+select {
+  border-color: #ddd;
+  color: #333;
+}
+input:focus,
+select:focus {
+  border-color: #111;
+  box-shadow: 0 0 0 3px #1111110c;
+}
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 3px;
+}
+label {
+  color: #666;
+}
+p {
+  color: #666;
+}
+h1 {
+  font-size: 27px;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+h2 {
+  letter-spacing: -0.03em;
+}
+.primary {
+  background: #111;
+  border-color: #111;
+  box-shadow: none;
+  font-weight: 600;
+}
+.primary:hover {
+  background: #333;
+}
+.secondary {
+  border-color: #ddd;
+}
+.sidebar {
+  width: 235px;
+  padding: 32px 17px 22px;
+  border-color: #e9e9e9;
+}
+.brand {
+  font-size: 20px;
+  letter-spacing: -0.055em;
+  padding-left: 13px;
+  gap: 9px;
+}
+.brand-icon {
+  color: #111;
+  background: transparent;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 0;
+}
+.church-logo {
+  display: block;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.brand-second {
+  font-size: 12px;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+.workspace-tag {
+  margin: 42px 15px 24px;
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  color: #aaa;
+}
+.nav-group {
+  margin-bottom: 18px;
+}
+.nav-label {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 9px;
+  font-weight: 600;
+  color: #aaa;
+  padding-left: 15px;
+}
+.nav-item {
+  gap: 13px;
+  padding: 13px 15px;
+  border-radius: 5px;
+  color: #777;
+  font-size: 11px;
+  font-weight: 600;
+}
+.nav-item.active {
+  background: #111;
+  color: #fff;
+}
+.nav-item:hover {
+  background: #f5f5f5;
+  color: #111;
+}
+.nav-item.active:hover {
+  background: #222;
+  color: #fff;
+}
+.active-dot {
+  display: none;
+}
+.sidebar-bottom {
+  border-top: 1px solid #eee;
+  padding-top: 17px;
+}
+.stewardship {
+  display: none;
+}
+.logout {
+  color: #777;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 13px 15px;
+}
+.workspace {
+  margin-left: 235px;
+  width: calc(100% - 235px);
+  position: relative;
+}
+.topbar {
+  position: absolute;
+  top: 31px;
+  right: 36px;
+  height: 38px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  z-index: 15;
+}
+.breadcrumb {
+  display: none;
+}
+.top-date {
+  font-size: 9px;
+  color: #666;
+}
+.top-divider {
+  display: none;
+}
+.avatar {
+  background: #eee;
+  border: 0;
+  color: #555;
+}
+.profile-menu strong,
+.profile-menu small {
+  font-size: 10px;
+}
+.profile-menu small {
+  color: #999;
+}
+.content {
+  padding: 30px 36px 35px;
+}
+.page-heading {
+  align-items: flex-start;
+  min-height: 100px;
+  margin-bottom: 23px;
+}
+.page-heading h1 {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.page-heading p {
+  font-size: 11px;
+}
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.17em;
+  color: #999;
+}
+.heading-actions {
+  margin-top: 66px;
+}
+.welcome-card {
+  background: #111;
+  color: #fff;
+  border-radius: 6px;
+  padding: 34px 39px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+.welcome-card .eyebrow {
+  color: #aaa;
+}
+.welcome-card h2 {
+  margin: 10px 0 5px;
+  font-size: 28px;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+.welcome-card p {
+  color: #bbb;
+  font-size: 11px;
+}
+.welcome-card > svg {
+  color: #888;
+  flex-shrink: 0;
+}
+.filter-bar {
+  border-radius: 5px;
+  padding: 16px;
+  background: white;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.filter-bar input,
+.filter-bar select {
+  background: white;
+  font-size: 10px;
+  border-color: #ddd;
+}
+.filter-heading {
+  color: #777;
+  font-size: 10px;
+}
+.panel {
+  border-radius: 5px;
+  border-color: #ececec;
+  box-shadow: none;
+}
+.kpi-grid {
+  gap: 15px;
+}
+.kpi {
+  padding: 21px;
+  min-height: 172px;
+  display: flex;
+  flex-direction: column;
+}
+.kpi-label {
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 15px;
+  font-size: 11px;
+  color: #777;
+}
+.kpi:nth-child(n) .kpi-icon {
+  background: #f3f3f3;
+  color: #333;
+  border-radius: 0;
+  width: 32px;
+  height: 32px;
+}
+.kpi > strong {
+  color: #111;
+  font-size: 27px;
+  letter-spacing: -0.06em;
+  margin: 4px 0 9px;
+}
+.kpi-footer {
+  margin-top: auto;
+}
+.panel-heading {
+  padding: 25px 25px 0;
+}
+.panel-heading h2 {
+  font-size: 17px;
+}
+.panel-heading p {
+  font-size: 11px;
+  color: #999;
+}
+.chart-note {
+  color: #999;
+  border-color: #f0f0f0;
+  font-size: 10px;
+}
+.chart-note strong {
+  color: #111;
+}
+.metric-list {
+  padding: 25px;
+}
+.metric-list h2 {
+  font-size: 15px;
+}
+.metric-list span {
+  color: #888;
+}
+.metric-list strong {
+  color: #111;
+}
+.metric-list > div:not(.goal) {
+  border-color: #f1f1f1;
+}
+.goal progress {
+  background: #eee;
+}
+.goal progress::-webkit-progress-bar {
+  background: #eee;
+}
+.goal progress::-webkit-progress-value {
+  background: #111;
+}
+.text-link,
+.text-button {
+  color: #111;
+  font-size: 11px;
+  font-weight: 600;
+}
+.danger {
+  color: #b55;
+}
+.badge {
+  background: #f3f3f3;
+  color: #777;
+  border-radius: 3px;
+}
+.badge.green {
+  background: #eaf4ed;
+  color: #27804f;
+}
+.section-caption {
+  color: #999;
+}
+.section-title h2 {
+  font-size: 17px;
+}
+th {
+  font-size: 10px;
+  color: #999;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: #fafafa;
+  padding: 14px 18px;
+}
+td {
+  color: #666;
+  font-size: 11px;
+  padding: 16px 18px;
+  border-color: #f0f0f0;
+}
+td strong {
+  color: #111;
+}
+.table-sub {
+  color: #aaa;
+}
+.search-box {
+  border-radius: 4px;
+}
+.pagination {
+  color: #999;
+}
+.page-footer {
+  color: #999;
+}
+.modal {
+  border-radius: 5px;
+  box-shadow: 0 24px 80px #0003;
+}
+.modal .panel-heading h2 {
+  font-size: 25px;
+  letter-spacing: -0.04em;
+}
+.modal-backdrop {
+  background: #0008;
+}
+.toast {
+  background: #111;
+  border-radius: 5px;
+  font-size: 11px;
+}
+.login-story {
+  background: #111;
+}
+.login-story .brand {
+  font-family: var(--font-poppins), Poppins, Arial, sans-serif;
+}
+.login-story h1 {
+  font-family: var(--font-poppins), Poppins, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.06em;
+}
+.login-story p {
+  color: #bbb;
+}
+.login-story .eyebrow,
+.login-story small {
+  color: #999;
+}
+.login-form {
+  background: #f7f7f7;
+}
+.login-card h2 {
+  letter-spacing: -0.04em;
+}
+@media (min-width: 1600px) {
+  .content {
+    padding-top: 30px;
+  }
+  .kpi > strong {
+    font-size: 29px;
+  }
+}
+@media (max-width: 1200px) {
+  .sidebar {
+    width: 215px;
+    padding: 30px 12px;
+  }
+  .workspace {
+    margin-left: 215px;
+    width: calc(100% - 215px);
+  }
+  .content {
+    padding: 30px 25px;
+  }
+  .topbar {
+    right: 25px;
+  }
+  .kpi {
+    padding: 20px;
+  }
+  .kpi > strong {
+    font-size: 25px;
+  }
+}
+@media (max-width: 960px) {
+  .top-date {
+    display: none;
+  }
+  .page-heading {
+    min-height: 112px;
+  }
+  .page-heading p {
+    max-width: 340px;
+  }
+  .welcome-card {
+    padding: 29px;
+  }
+  .welcome-card h2 {
+    font-size: 25px;
+  }
+}
+@media (max-width: 700px) {
+  .sidebar {
+    width: 250px;
+    padding: 30px 17px;
+  }
+  .workspace {
+    width: 100%;
+    margin-left: 0;
+  }
+  .topbar {
+    top: 17px;
+    left: 16px;
+    right: 16px;
+    justify-content: space-between;
+  }
+  .breadcrumb {
+    display: flex;
+  }
+  .breadcrumb > strong,
+  .breadcrumb > svg {
+    display: none;
+  }
+  .content {
+    padding: 75px 16px 20px;
+  }
+  .page-heading {
+    min-height: 0;
+    gap: 17px;
+    margin-bottom: 23px;
+  }
+  .page-heading h1 {
+    font-size: 25px;
+  }
+  .heading-actions {
+    margin-top: 0;
+  }
+  .welcome-card {
+    padding: 26px 23px;
+  }
+  .welcome-card h2 {
+    font-size: 23px;
+  }
+  .welcome-card > svg {
+    width: 36px;
+  }
+  .kpi {
+    padding: 18px 15px;
+    min-height: 178px;
+  }
+  .kpi > strong {
+    font-size: 23px;
+  }
+  .kpi-label {
+    font-size: 10px;
+  }
+  .panel-heading {
+    padding: 20px 19px 0;
+  }
+  .panel-heading h2 {
+    font-size: 15px;
+  }
+  .metric-list {
+    padding: 23px;
+  }
+  .login-story h1 {
+    font-size: 37px;
+  }
+  .modal .panel-heading h2 {
+    font-size: 23px;
+  }
+}
+@media print {
+  .welcome-card {
+    display: none;
+  }
+  .content {
+    padding: 0;
+  }
+  .heading-actions {
+    display: none;
+  }
+  .page-heading {
+    min-height: 0;
+  }
+  .workspace {
+    margin: 0;
+    width: 100%;
+  }
+}

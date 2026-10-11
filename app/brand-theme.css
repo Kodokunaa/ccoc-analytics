@@ -1,0 +1,556 @@
+/* Teal is the interface accent. Orange is reserved for analytics; the logo retains its original color. */
+.dashboard-charts.single-chart {
+  grid-template-columns: minmax(0, 1fr);
+}
+.operations-panel {
+  margin-top: 24px;
+  padding: 28px;
+}
+.operations-panel > * + * {
+  margin-top: 16px;
+}
+.operation-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.operations-panel form {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+.slide-preview {
+  background: white;
+  border: 1px solid #7c8b87;
+  border-radius: 12px;
+  padding: 32px;
+}
+.slide-preview th {
+  background: var(--brand-turquoise);
+  color: white !important;
+}
+.checksum {
+  overflow-wrap: anywhere;
+}
+.operations-panel {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.operations-panel .table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.operations-panel input[type="file"] {
+  min-width: 0;
+  max-width: 100%;
+}
+.operations-panel label {
+  min-width: 0;
+  max-width: 100%;
+}
+.recovery-page {
+  min-height: 100vh;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.recovery-page .login-card {
+  width: 100%;
+  max-width: 480px;
+}
+.recovery-page form {
+  display: grid;
+  gap: 18px;
+}
+@media (max-width: 600px) {
+  .operations-panel {
+    padding: 16px;
+  }
+  .slide-preview {
+    padding: 16px;
+  }
+}
+:root {
+  --accent: #007f78;
+  --brand-orange: #c44f00;
+  --brand-orange-hover: #a84400;
+  --brand-orange-ink: #ffffff;
+  --brand-orange-soft: #ffffff;
+  --brand-turquoise: #007f78;
+  --brand-turquoise-chart: #007f78;
+  --brand-turquoise-hover: #006b65;
+  --brand-turquoise-soft: #e2faf7;
+  --brand-turquoise-surface: #007f78;
+}
+.primary {
+  background: var(--brand-turquoise);
+  border-color: var(--brand-turquoise);
+  color: #ffffff;
+}
+.primary:hover {
+  background: var(--brand-turquoise-hover);
+  border-color: var(--brand-turquoise-hover);
+  color: #ffffff;
+}
+button:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 3px white;
+}
+input:focus,
+select:focus {
+  border-color: #000000;
+  box-shadow: 0 0 0 3px #007f7830;
+}
+input,
+select,
+.filter-bar input,
+.filter-bar select,
+.search-box,
+.secondary,
+.google-button {
+  border-color: #7c8b87;
+}
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--brand-turquoise);
+}
+.nav-item,
+.logout,
+.workspace-tag,
+.nav-label {
+  color: #596260;
+}
+.nav-item:hover,
+.public-tabs button:hover {
+  background: var(--brand-turquoise-soft);
+  color: var(--brand-turquoise);
+}
+.nav-item.active,
+.public-tabs button.active {
+  background: var(--brand-turquoise-surface);
+  color: var(--brand-turquoise-hover);
+  box-shadow: inset 0 -3px var(--brand-turquoise-chart);
+}
+.nav-item.active:hover,
+.public-tabs button.active:hover {
+  background: #006b65;
+  color: var(--brand-turquoise-hover);
+}
+.welcome-card,
+.login-story {
+  background: var(--brand-turquoise-surface);
+  color: #163d38;
+}
+.welcome-card .eyebrow,
+.login-story .eyebrow {
+  color: #ffffff;
+}
+.welcome-card p,
+.login-story p,
+.login-story small {
+  color: #365e57;
+}
+.public-hero-details > span {
+  background: #f5fcfa;
+  border-color: #7aa49c;
+  color: #365e57;
+}
+.eyebrow,
+.text-link,
+.text-button,
+.public-back,
+.filter-heading > svg,
+.signin-feature > svg {
+  color: var(--brand-turquoise);
+}
+.text-link:hover,
+.text-button:hover,
+.public-back:hover {
+  color: var(--brand-turquoise-hover);
+  text-decoration: underline;
+}
+.kpi:nth-child(n) .kpi-icon {
+  background: var(--brand-orange-soft);
+  color: #b54708;
+}
+.kpi:nth-child(even) .kpi-icon,
+.avatar,
+.signin-church {
+  background: var(--brand-turquoise-soft);
+  color: var(--brand-turquoise);
+}
+.positive,
+.badge.green {
+  background: var(--brand-turquoise-soft);
+  color: var(--brand-turquoise);
+}
+.negative {
+  background: var(--brand-orange-soft);
+  color: #a63e08;
+}
+.neutral {
+  color: #626262;
+}
+.goal progress::-webkit-progress-value {
+  background: var(--brand-turquoise);
+}
+.goal progress::-moz-progress-bar {
+  background: var(--brand-turquoise);
+}
+.google-button:hover {
+  background: var(--brand-turquoise-soft);
+  border-color: var(--brand-turquoise);
+}
+button:disabled {
+  opacity: 1;
+  background: #eceeed;
+  border-color: #d6dbda;
+  color: #596260;
+  cursor: not-allowed;
+}
+/* Secondary text needs full text contrast even when visually de-emphasized. */
+.public-tabs button,
+.kpi-footer > span:last-child,
+.badge,
+.filter-heading,
+.muted,
+.empty,
+.page-footer,
+.login-card > small,
+.goal small {
+  color: #596260;
+}
+.empty h3 {
+  color: #365e57;
+}
+input::placeholder {
+  color: #69716f;
+  opacity: 1;
+}
+.danger {
+  color: #a13629;
+}
+.badge.green {
+  color: var(--brand-turquoise);
+}
+
+/* Enforce the requested text rule over older page-specific muted colors. */
+body
+  :is(
+    h1,
+    h2,
+    h3,
+    p,
+    a,
+    button,
+    label,
+    input,
+    select,
+    small,
+    strong,
+    span,
+    th,
+    td,
+    .muted,
+    .empty,
+    .filter-heading,
+    .page-footer
+  ) {
+  color: #000000 !important;
+}
+input::placeholder {
+  color: #000000;
+  opacity: 1;
+}
+body .primary,
+body .primary *,
+body .negative,
+body .negative *,
+body .toast,
+body .toast * {
+  color: #ffffff !important;
+}
+.negative {
+  background: var(--brand-orange);
+}
+.toast {
+  background: var(--brand-turquoise);
+}
+.positive,
+.badge.green {
+  background: var(--brand-turquoise);
+}
+.public-hero-details > span {
+  background: #ffffff;
+}
+.danger {
+  text-decoration: underline;
+}
+.primary:disabled {
+  background: #eceeed;
+  border-color: transparent;
+}
+.primary:disabled,
+.primary:disabled * {
+  color: #000000 !important;
+}
+.primary,
+.primary:hover,
+.primary:disabled,
+.google-button,
+.google-button:hover {
+  border-color: transparent;
+}
+body button.primary:not(:disabled),
+body a.primary,
+body button.primary:not(:disabled) *,
+body a.primary * {
+  color: #ffffff !important;
+}
+body .public-tabs button.active,
+body .public-tabs button.active *,
+body .nav-item.active,
+body .nav-item.active *,
+body .positive,
+body .positive *,
+body .badge.green,
+body .badge.green *,
+body .welcome-card :is(h1, h2, p, .eyebrow),
+body .login-story :is(h1, p, small, .eyebrow, .brand, .brand span) {
+  color: #ffffff !important;
+}
+body .slide-preview th {
+  color: #ffffff !important;
+}
+.report-actions a.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Keep the selected fill local so it never passes beneath another tab's text. */
+body .public-tabs button {
+  position: relative;
+  isolation: isolate;
+  transition: none;
+}
+body .public-tabs button.active,
+body .public-tabs button.active:hover {
+  background: var(--brand-turquoise);
+  box-shadow: none;
+}
+.public-tabs .tab-indicator {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--brand-turquoise);
+  pointer-events: none;
+}
+.public-tabs .tab-label {
+  position: relative;
+}
+.month-progress {
+  max-width: 520px;
+  margin: 16px 0 22px;
+}
+.assistant-draft {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #d8dfde;
+}
+.assistant-copy {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Optional tools stay available without repeating the main report content. */
+.disclosure-panel {
+  margin-top: 18px;
+  border-radius: 8px;
+}
+.disclosure-panel > summary {
+  min-height: 44px;
+  padding: 12px 0;
+  font-weight: 600;
+  cursor: pointer;
+}
+.disclosure-panel.panel > summary {
+  padding: 12px 0;
+}
+.disclosure-panel[open] > summary {
+  margin-bottom: 16px;
+}
+.disclosure-panel > .operations-panel {
+  margin-top: 0;
+}
+.disclosure-panel .operation-actions {
+  padding: 12px 0;
+}
+.analysis-views {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.analysis-views a {
+  padding: 10px 18px;
+  border-radius: 6px;
+  background: white;
+}
+body .analysis-views a[aria-current="page"] {
+  background: var(--brand-turquoise);
+  color: white !important;
+}
+
+.report-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 18px;
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.report-actions a.secondary {
+  background: white;
+  border-color: #7c8b87;
+}
+.range-filter {
+  min-width: 0;
+}
+.range-filter > summary {
+  cursor: pointer;
+  padding: 10px 0;
+  font-weight: 500;
+}
+.range-filter[open] .operation-actions {
+  padding-top: 10px;
+}
+
+/* Consistent, readable controls without adding more content to each page. */
+.login {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.login-story,
+.login-form,
+.login-card {
+  min-width: 0;
+}
+.login-card {
+  width: min(350px, 100%);
+}
+.filter-bar input,
+.filter-bar select,
+.operation-actions input:not([type="checkbox"]):not([type="radio"]),
+.operation-actions select {
+  min-height: 44px;
+  font-size: 13px;
+}
+.filter-bar label,
+.filter-heading {
+  font-size: 12px;
+}
+.filter-bar select {
+  width: 100%;
+}
+.heading-actions a.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 13px;
+  border: 1px solid #7c8b87;
+  border-radius: 4px;
+}
+.public-tabs button,
+.google-button.compact {
+  min-height: 44px;
+  font-size: 13px;
+}
+td,
+.text-link,
+.text-button,
+.pagination {
+  font-size: 13px;
+}
+th {
+  font-size: 11px;
+}
+.text-button,
+.pagination button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 8px;
+}
+.pagination button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.range-filter > summary,
+.operations-panel summary,
+.table-wrap summary,
+td summary,
+.public-back,
+.login-card > .text-link,
+.recovery-page a {
+  min-height: 44px;
+  padding-block: 12px;
+}
+.public-back,
+.login-card > .text-link,
+.recovery-page a {
+  display: inline-flex;
+  align-items: center;
+}
+.profile-menu > summary {
+  min-height: 44px;
+  min-width: 44px;
+  justify-content: center;
+}
+.kpi-label,
+.kpi-footer,
+.trend,
+.section-caption,
+.table-sub,
+.page-footer,
+.public-footer {
+  font-size: 11px;
+}
+@media (max-width: 700px) {
+  .login {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .filter-bar > label:has(select[aria-label="Compare with"]) {
+    flex-basis: 100%;
+  }
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  .filter-bar input,
+  .filter-bar select,
+  .search-box input,
+  .operation-actions input:not([type="checkbox"]):not([type="radio"]),
+  .operation-actions select {
+    font-size: 16px;
+  }
+  .public-tabs button {
+    font-size: 12px;
+    padding-inline: 10px;
+  }
+  .pagination {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}

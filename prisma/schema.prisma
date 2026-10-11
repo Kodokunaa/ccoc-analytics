@@ -1,0 +1,247 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ServiceType {
+  SUNDAY_SERVICE
+  MIDWEEK_SERVICE
+  SPECIAL_EVENT
+  OTHER
+}
+
+enum TargetType {
+  ATTENDANCE
+  GIVING
+}
+
+enum PeriodType {
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+}
+
+model Role {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id           String             @id @default(cuid())
+  name         String
+  email        String             @unique
+  passwordHash String
+  roleId       String
+  role         Role               @relation(fields: [roleId], references: [id])
+  status       UserStatus         @default(ACTIVE)
+  sessions     Session[]
+  services     Service[]
+  attendance   AttendanceRecord[]
+  giving       GivingRecord[]
+  targets      Target[]
+  logs         AuditLog[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+
+  @@index([userId])
+}
+
+model LoginAttempt {
+  id        String   @id
+  count     Int      @default(0)
+  expiresAt DateTime
+
+  @@index([expiresAt])
+}
+
+model GoogleViewer {
+  id            String                @id @default(cuid())
+  googleSubject String                @unique
+  email         String
+  name          String
+  sessions      GoogleViewerSession[]
+  exports       PublicExportLog[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+}
+
+model GoogleViewerSession {
+  id        String       @id
+  viewerId  String
+  viewer    GoogleViewer @relation(fields: [viewerId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+
+  @@index([viewerId])
+}
+
+model PublicExportLog {
+  id        String       @id @default(cuid())
+  viewerId  String
+  viewer    GoogleViewer @relation(fields: [viewerId], references: [id])
+  scope     String
+  period    String
+  ipAddress String?
+  createdAt DateTime     @default(now())
+
+  @@index([createdAt, viewerId])
+}
+
+model Service {
+  id          String            @id @default(cuid())
+  serviceDate DateTime          @db.Date
+  serviceType ServiceType
+  serviceName String
+  notes       String?
+  createdBy   String
+  creator     User              @relation(fields: [createdBy], references: [id])
+  attendance  AttendanceRecord?
+  giving      GivingRecord[]
+  deletedAt   DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([serviceDate, serviceType, deletedAt])
+  @@index([deletedAt, serviceDate])
+}
+
+model AttendanceRecord {
+  id              String   @id @default(cuid())
+  serviceId       String   @unique
+  service         Service  @relation(fields: [serviceId], references: [id])
+  totalAttendance Int
+  adultCount      Int      @default(0)
+  childrenCount   Int      @default(0)
+  visitorCount    Int      @default(0)
+  memberCount     Int      @default(0)
+  createdBy       String
+  creator         User     @relation(fields: [createdBy], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model GivingRecord {
+  id        String   @id @default(cuid())
+  serviceId String
+  service   Service  @relation(fields: [serviceId], references: [id])
+  amount    Decimal  @db.Decimal(14, 2)
+  notes     String?
+  createdBy String
+  creator   User     @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([serviceId])
+}
+
+model Target {
+  id          String     @id @default(cuid())
+  type        TargetType
+  periodType  PeriodType
+  targetValue Decimal    @db.Decimal(14, 2)
+  startDate   DateTime   @db.Date
+  endDate     DateTime   @db.Date
+  createdBy   String
+  creator     User       @relation(fields: [createdBy], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([startDate, endDate])
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  userId    String
+  user      User        @relation(fields: [userId], references: [id])
+  action    AuditAction
+  entity    String
+  entityId  String
+  oldData   Json?
+  newData   Json?
+  ipAddress String?
+  createdAt DateTime    @default(now())
+
+  @@index([createdAt, userId])
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model ReportMonth {
+  month      String    @id
+  approvedAt DateTime?
+  approvedBy String?
+  snapshot   Json?
+  updatedAt  DateTime  @updatedAt
+}
+
+model ReportArtifact {
+  id        String   @id @default(cuid())
+  filename  String
+  month     String
+  scope     String
+  format    String
+  checksum  String
+  contents  Bytes
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([month, createdAt])
+}
+
+model PasswordReset {
+  tokenHash String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model ManusReportTask {
+  id        String   @id @default(cuid())
+  month     String
+  status    String   @default("CREATING")
+  createdBy String
+  remoteId  String?
+  remoteUrl String?
+  payload   Json
+  output    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([month, createdAt])
+}
