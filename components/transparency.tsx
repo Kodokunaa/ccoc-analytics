@@ -47,6 +47,7 @@ export default function Transparency({
   initialScope = "month",
   initialExportOpen = false,
   initialFormat = "xlsx",
+  initialReport = "attendance",
 }: {
   initialData: TransparencyData;
   initialMonth: string;
@@ -55,6 +56,7 @@ export default function Transparency({
   initialScope?: "data" | "month" | "year";
   initialExportOpen?: boolean;
   initialFormat?: "xlsx" | "pptx";
+  initialReport?: "attendance" | "giving";
 }) {
   const [data, setData] = useState(initialData),
     [month, setMonth] = useState(initialMonth),
@@ -65,8 +67,15 @@ export default function Transparency({
     [downloading, setDownloading] = useState(false),
     [notice, setNotice] = useState(""),
     [exportOpen, setExportOpen] = useState(initialExportOpen),
-    [scope, setScope] = useState<"data" | "month" | "year">(initialScope),
+    [scope, setScope] = useState<"data" | "month" | "year">(
+      initialFormat === "pptx" && initialScope === "data"
+        ? "month"
+        : initialScope,
+    ),
     [format, setFormat] = useState<"xlsx" | "pptx">(initialFormat),
+    [reportType, setReportType] = useState<"attendance" | "giving">(
+      initialReport,
+    ),
     [search, setSearch] = useState(""),
     [page, setPage] = useState(1);
   const modalRef = useRef<HTMLElement>(null),
@@ -142,7 +151,7 @@ export default function Transparency({
     setNotice("");
     try {
       const response = await fetch(
-        `/api/transparency/export?scope=${scope}&year=${year}&month=${month}&format=${format}`,
+        `/api/transparency/export?scope=${scope}&year=${year}&month=${month}&format=${format}&report=${reportType}`,
       );
       if (!response.ok) {
         const body = await response.json();
@@ -152,7 +161,7 @@ export default function Transparency({
       const url = URL.createObjectURL(await response.blob()),
         anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `city-church-${scope === "year" ? `${year}-monthly-reports` : `${month}-${scope}`}.${format}`;
+      anchor.download = `city-church-${format === "pptx" ? `${reportType}-` : ""}${scope === "year" ? `${year}-monthly-reports` : `${month}-${scope}`}.${format}`;
       anchor.click();
       URL.revokeObjectURL(url);
       setExportOpen(false);
@@ -167,7 +176,6 @@ export default function Transparency({
       setDownloading(false);
     }
   }
-  const weekly = useMemo(() => series(report.records), [report.records]);
   const metric = (
     name: string,
     value: string,
@@ -483,18 +491,41 @@ export default function Transparency({
                     HeartHandshake,
                   )}
                 </div>
-                <div className="dashboard-charts single-chart">
+                <div className="dashboard-charts separate-trends">
                   <section className="panel">
                     <div className="panel-heading">
                       <div>
-                        <h2>Attendance & generosity</h2>
+                        <h2>Attendance trend</h2>
                         <p>Service records grouped by week</p>
                       </div>
                       <span className="badge">{report.title}</span>
                     </div>
-                    <TrendChart data={weekly} />
+                    <TrendChart
+                      data={series(
+                        report.records.filter((s) => s.attendance !== null),
+                      )}
+                      mode="attendance"
+                      comparison={false}
+                    />
+                    <div className="chart-note">Attendance grouped by week</div>
+                  </section>
+                  <section className="panel">
+                    <div className="panel-heading">
+                      <div>
+                        <h2>Giving trend</h2>
+                        <p>Recorded giving grouped by week</p>
+                      </div>
+                      <span className="badge">{report.title}</span>
+                    </div>
+                    <TrendChart
+                      data={series(
+                        report.records.filter((s) => s.giving.length > 0),
+                      )}
+                      mode="financial"
+                      comparison={false}
+                    />
                     <div className="chart-note">
-                      Attendance on the left · Giving in PHP on the right
+                      Giving in Philippine Peso (PHP)
                     </div>
                   </section>
                 </div>
@@ -701,6 +732,21 @@ export default function Transparency({
                   <option value="pptx">Monthly PowerPoint (.pptx)</option>
                 </select>
               </label>
+              {format === "pptx" && (
+                <label>
+                  Report type
+                  <select
+                    aria-label="Report type"
+                    value={reportType}
+                    onChange={(e) =>
+                      setReportType(e.target.value as typeof reportType)
+                    }
+                  >
+                    <option value="attendance">Attendance</option>
+                    <option value="giving">Giving</option>
+                  </select>
+                </label>
+              )}
               <label>
                 Export contents
                 <select
@@ -710,9 +756,11 @@ export default function Transparency({
                 >
                   <option value="month">Monthly report · {report.title}</option>
                   <option value="year">Reports for every month · {year}</option>
-                  <option value="data">
-                    Attendance & giving data · {report.title}
-                  </option>
+                  {format === "xlsx" && (
+                    <option value="data">
+                      Attendance & giving data · {report.title}
+                    </option>
+                  )}
                 </select>
               </label>
               <div className="export-description">
@@ -727,7 +775,7 @@ export default function Transparency({
                   </strong>
                   <p>
                     {format === "pptx"
-                      ? "Attendance numbers, attendance graph, and last-month / last-year comparison, followed by the same three slides for giving. Six slides per month."
+                      ? `${reportType === "attendance" ? "Attendance" : "Giving"} numbers, graph, and comparisons with last month and last year. Three slides per month.`
                       : scope === "year"
                         ? "An annual summary plus January–December reports, with previous-month comparisons."
                         : "Includes recorded service data and a summary compared with the previous month."}
@@ -765,7 +813,7 @@ export default function Transparency({
                   </div>
                   <Link
                     className="google-button"
-                    href={`/signin?next=${encodeURIComponent(`${currentPath}&export=${scope}&format=${format}`)}`}
+                    href={`/signin?next=${encodeURIComponent(`${currentPath}&export=${scope}&format=${format}&report=${reportType}`)}`}
                   >
                     <GoogleMark />
                     Continue with Google

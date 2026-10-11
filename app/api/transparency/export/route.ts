@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
       .extend({
         scope: z.enum(["data", "month", "year"]),
         format: z.enum(["xlsx", "pptx"]).default("xlsx"),
+        report: z.enum(["attendance", "giving"]).default("attendance"),
         month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
       })
       .refine(
@@ -70,11 +71,12 @@ export async function GET(req: NextRequest) {
             q.scope,
             q.month,
             sources,
+            q.report,
           )
         : await (
             await import("@/lib/public-workbook")
           ).publicWorkbook(data, q.scope, q.month, q.year, sources);
-    const filename = `city-church-${q.scope === "year" ? `${q.year}-monthly-reports` : `${q.month}-${q.scope}`}.${q.format}`;
+    const filename = `city-church-${q.format === "pptx" ? `${q.report}-` : ""}${q.scope === "year" ? `${q.year}-monthly-reports` : `${q.month}-${q.scope}`}.${q.format}`;
     await db.$transaction([
       db.reportArtifact.create({
         data: {
@@ -90,7 +92,7 @@ export async function GET(req: NextRequest) {
       db.publicExportLog.create({
         data: {
           viewerId: viewer.id,
-          scope: q.format === "pptx" ? `pptx-${q.scope}` : q.scope,
+          scope: q.format === "pptx" ? `pptx-${q.report}-${q.scope}` : q.scope,
           period: q.scope === "year" ? String(q.year) : q.month,
           ...auditContext(req),
         },

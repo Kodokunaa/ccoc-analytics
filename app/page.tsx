@@ -11,6 +11,7 @@ export default async function Page({
     year?: string;
     export?: string;
     format?: string;
+    report?: string;
   }>;
 }) {
   const q = await searchParams,
@@ -56,6 +57,7 @@ export default async function Page({
       googleReady={googleConfigured()}
       initialScope={exportScope ?? "month"}
       initialFormat={q.format === "pptx" ? "pptx" : "xlsx"}
+      initialReport={q.report === "giving" ? "giving" : "attendance"}
       initialExportOpen={!!exportScope}
     />
   );

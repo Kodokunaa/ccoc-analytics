@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import type { ReportSlide } from "@/lib/presentation-model";
+import type { PresentationMetric } from "@/lib/presentation-model";
 import { TrendChart } from "./lazy-charts";
 import dynamic from "next/dynamic";
 import { LazyMotion, domAnimation, m, useReducedMotion } from "motion/react";
@@ -39,6 +40,7 @@ export default function ReportWorkflow({
       slides: ReportSlide[];
       churchName: string;
       approved: boolean;
+      report: PresentationMetric;
     } | null>(null),
     [page, setPage] = useState(0);
   const load = useCallback(async () => {
@@ -162,31 +164,34 @@ export default function ReportWorkflow({
                     Approve and lock month
                   </button>
                 ))}
-              <button
-                className="secondary"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  setError("");
-                  try {
-                    const res = await fetch(
-                      `/api/report-preview?month=${month}`,
-                    );
-                    const json = await res.json();
-                    if (!res.ok) throw new Error(json.error);
-                    setPreview(json);
-                    setPage(0);
-                  } catch (e) {
-                    setError(
-                      e instanceof Error ? e.message : "Unable to preview",
-                    );
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-              >
-                Preview monthly PowerPoint
-              </button>
+              {(["attendance", "giving"] as const).map((report) => (
+                <button
+                  key={report}
+                  className="secondary"
+                  disabled={busy}
+                  onClick={async () => {
+                    setBusy(true);
+                    setError("");
+                    try {
+                      const res = await fetch(
+                        `/api/report-preview?month=${month}&report=${report}`,
+                      );
+                      const json = await res.json();
+                      if (!res.ok) throw new Error(json.error);
+                      setPreview(json);
+                      setPage(0);
+                    } catch (e) {
+                      setError(
+                        e instanceof Error ? e.message : "Unable to preview",
+                      );
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  Preview {report} PowerPoint
+                </button>
+              ))}
             </div>
           </>
         )}
@@ -197,7 +202,10 @@ export default function ReportWorkflow({
           aria-label="PowerPoint content preview"
         >
           <div className="operation-actions">
-            <h2>PowerPoint preview</h2>
+            <h2>
+              {preview.report === "attendance" ? "Attendance" : "Giving"}{" "}
+              PowerPoint preview
+            </h2>
             <button className="secondary" onClick={() => setPreview(null)}>
               Close preview
             </button>
@@ -220,6 +228,18 @@ export default function ReportWorkflow({
               {preview.slides[page].rows && (
                 <div className="table-wrap">
                   <table>
+                    <colgroup>
+                      {(preview.slides[page].widths ?? [8, 4]).map(
+                        (width, i, widths) => (
+                          <col
+                            key={i}
+                            style={{
+                              width: `${(width / widths.reduce((sum, w) => sum + w, 0)) * 100}%`,
+                            }}
+                          />
+                        ),
+                      )}
+                    </colgroup>
                     <thead>
                       <tr>
                         {preview.slides[page].rows![0].map((c, i) => (
@@ -257,6 +277,7 @@ export default function ReportWorkflow({
                       ? "attendance"
                       : "financial"
                   }
+                  comparison={false}
                 />
               )}
               {preview.slides[page].empty && (

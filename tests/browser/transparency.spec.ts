@@ -30,7 +30,9 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
   await page.getByLabel("File format").selectOption("pptx");
   await expect(page.getByLabel("File format")).toHaveValue("pptx");
   await expect(page.getByLabel("Export contents")).toHaveValue("month");
-  await expect(page.getByRole("dialog")).toContainText("Six slides per month");
+  await expect(page.getByRole("dialog")).toContainText(
+    "Three slides per month",
+  );
   await page.getByLabel("File format").selectOption("xlsx");
   await page.getByRole("button", { name: "Close export" }).click();
   expect(
@@ -212,7 +214,7 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
     .getByRole("button", { name: "Download PowerPoint", exact: true })
     .click();
   expect((await pptDownload).suggestedFilename()).toBe(
-    "city-church-2026-01-month.pptx",
+    "city-church-attendance-2026-01-month.pptx",
   );
   const presentation = await api.get(
     "/api/transparency/export?scope=month&year=2026&month=2026-01&format=pptx",
@@ -226,14 +228,11 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
     Object.keys(zip.files).filter((name) =>
       /^ppt\/slides\/slide\d+\.xml$/.test(name),
     ),
-  ).toHaveLength(6);
+  ).toHaveLength(3);
   const titles = [
     "Attendance numbers",
     "Attendance graph",
     "Attendance comparison",
-    "Giving numbers",
-    "Giving graph",
-    "Giving comparison",
   ];
   for (let i = 0; i < titles.length; i++)
     expect(
@@ -255,7 +254,7 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
     Object.keys(zip.files).filter((name) =>
       /^ppt\/charts\/chart\d+\.xml$/.test(name),
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   const annualPpt = await api.get(
     "/api/transparency/export?scope=year&year=2026&month=2026-01&format=pptx",
   );
@@ -265,7 +264,7 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
     Object.keys(annualZip.files).filter((name) =>
       /^ppt\/slides\/slide\d+\.xml$/.test(name),
     ),
-  ).toHaveLength(72);
+  ).toHaveLength(36);
   await api.delete("/api/google/session", {
     headers: { Origin: "http://localhost:3000" },
   });

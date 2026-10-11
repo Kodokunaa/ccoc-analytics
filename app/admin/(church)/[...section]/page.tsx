@@ -8,7 +8,6 @@ const sections = [
   "giving",
   "analytics/attendance",
   "analytics/financial",
-  "analytics/combined",
   "reports",
   "targets",
   "users",
@@ -22,6 +21,7 @@ export default async function Page({
 }) {
   const { section } = await params;
   const path = section.join("/");
+  if (path === "analytics/combined") redirect("/admin/analytics/attendance");
   if (!sections.includes(path)) notFound();
   const user = await currentUser();
   if (

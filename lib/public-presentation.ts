@@ -1,9 +1,12 @@
 import PptxGenJS from "pptxgenjs";
-import { presentationSlides } from "./presentation-model";
+import {
+  presentationSlides,
+  type PresentationMetric,
+} from "./presentation-model";
 import { monthName } from "./public-analytics";
 import type { TransparencyData } from "./transparency";
 
-/** Six focused, editable slides per month; no cover precedes attendance numbers. */
+/** Three editable slides per month for the selected report. */
 export async function publicPresentation(
   data: TransparencyData,
   previousYear: TransparencyData,
@@ -13,16 +16,17 @@ export async function publicPresentation(
     string,
     { data: TransparencyData; previousYear: TransparencyData }
   > = {},
+  report: PresentationMetric = "attendance",
 ) {
   const ppt = new PptxGenJS();
   ppt.layout = "LAYOUT_WIDE";
   ppt.author = data.churchName;
-  ppt.subject = "Public attendance and giving reports";
-  ppt.title = `${data.churchName} — ${scope === "year" ? month.slice(0, 4) : monthName(month)}`;
+  ppt.subject = `Public ${report} report`;
+  ppt.title = `${data.churchName} — ${report === "attendance" ? "Attendance" : "Giving"} — ${scope === "year" ? month.slice(0, 4) : monthName(month)}`;
   ppt.company = data.churchName;
   ppt.theme = {
-    headFontFace: "Poppins",
-    bodyFontFace: "Poppins",
+    headFontFace: "Arial",
+    bodyFontFace: "Arial",
   };
   const months = scope === "year" ? data.months.map((r) => r.month) : [month];
   let page = 0;
@@ -34,7 +38,7 @@ export async function publicPresentation(
       y: 0.55,
       w: 12,
       h: 0.6,
-      fontFace: "Poppins",
+      fontFace: "Arial",
       fontSize: 32,
       bold: true,
       color: "000000",
@@ -83,7 +87,7 @@ export async function publicPresentation(
         w: 12,
         colW: widths,
         rowH: 0.55,
-        fontFace: "Poppins",
+        fontFace: "Arial",
         fontSize: size,
         color: "000000",
         margin: 0.12,
@@ -98,6 +102,7 @@ export async function publicPresentation(
       source.data,
       source.previousYear,
       selected,
+      report,
     )) {
       const s = slide(model.title, model.period, model.note);
       if (model.rows)
@@ -130,9 +135,9 @@ export async function publicPresentation(
             w: 12,
             h: 4.65,
             barDir: "col",
-            catAxisLabelFontFace: "Poppins",
+            catAxisLabelFontFace: "Arial",
             catAxisLabelFontSize: 14,
-            valAxisLabelFontFace: "Poppins",
+            valAxisLabelFontFace: "Arial",
             valAxisLabelFontSize: 14,
             valAxisMinVal: 0,
             valAxisLabelFormatCode: "#,##0",
@@ -145,7 +150,7 @@ export async function publicPresentation(
               model.chart.metric === "attendance" ? "#,##0" : "#,##0.00",
             dataLabelPosition: "outEnd",
             dataLabelColor: "000000",
-            dataLabelFontFace: "Poppins",
+            dataLabelFontFace: "Arial",
             dataLabelFontSize: 16,
             showTitle: false,
           },

@@ -38,7 +38,6 @@ import {
   summary,
   series,
   comparisonSeries,
-  pearson,
   type RecordData,
 } from "@/lib/analytics";
 import {
@@ -116,7 +115,8 @@ const nav: { label: string; items: [string, string, LucideIcon][] }[] = [
   {
     label: "Insights & planning",
     items: [
-      ["Analytics", "analytics/attendance", ChartNoAxesCombined],
+      ["Attendance analytics", "analytics/attendance", ChartNoAxesCombined],
+      ["Giving analytics", "analytics/financial", ChartNoAxesCombined],
       ["Reports", "reports", FileText],
     ],
   },
@@ -273,8 +273,14 @@ export default function Workspace({ section }: { section: string }) {
   }, [data, start, end, comparison, customStart, customEnd]);
   const stats = useMemo(() => summary(filtered), [filtered]),
     prior = useMemo(() => summary(previous), [previous]),
-    weekly = useMemo(() => series(filtered), [filtered]),
-    monthly = useMemo(() => series(filtered, "monthly"), [filtered]);
+    attendanceWeekly = useMemo(
+      () => series(filtered.filter((s) => s.attendance !== null)),
+      [filtered],
+    ),
+    givingWeekly = useMemo(
+      () => series(filtered.filter((s) => s.giving.length > 0)),
+      [filtered],
+    );
   const hasAttendanceComparison =
       filtered.some((s) => s.attendance !== null) &&
       previous.some((s) => s.attendance !== null),
@@ -1045,18 +1051,39 @@ export default function Workspace({ section }: { section: string }) {
                       "vs. comparison",
                     )}
                   </div>
-                  <div className="dashboard-charts single-chart">
+                  <div className="dashboard-charts separate-trends">
                     <section className="panel">
                       <div className="panel-heading">
                         <div>
-                          <h2>Attendance & generosity</h2>
+                          <h2>Attendance trend</h2>
                           <p>How our community shows up, week by week</p>
                         </div>
                         <span className="badge">Weekly</span>
                       </div>
-                      <TrendChart data={weekly} />
+                      <TrendChart
+                        data={attendanceWeekly}
+                        mode="attendance"
+                        comparison={false}
+                      />
                       <div className="chart-note">
-                        Attendance on the left · Giving in PHP on the right
+                        Attendance grouped by week
+                      </div>
+                    </section>
+                    <section className="panel">
+                      <div className="panel-heading">
+                        <div>
+                          <h2>Giving trend</h2>
+                          <p>Recorded giving grouped by week</p>
+                        </div>
+                        <span className="badge">Weekly</span>
+                      </div>
+                      <TrendChart
+                        data={givingWeekly}
+                        mode="financial"
+                        comparison={false}
+                      />
+                      <div className="chart-note">
+                        Giving in Philippine Peso (PHP)
                       </div>
                     </section>
                   </div>
@@ -1064,118 +1091,53 @@ export default function Workspace({ section }: { section: string }) {
               )}
               {section.startsWith("analytics/") && (
                 <>
-                  <nav className="analysis-views" aria-label="Analytics views">
-                    {[
-                      ["attendance", "Attendance"],
-                      ["financial", "Giving"],
-                    ].map(([view, name]) => (
-                      <Link
-                        key={view}
-                        href={`/admin/analytics/${view}`}
-                        aria-current={
-                          section.endsWith(view) ? "page" : undefined
-                        }
-                      >
-                        {name}
-                      </Link>
-                    ))}
-                  </nav>
                   <div className="analytics-grid">
-                    {section === "analytics/combined" ? (
+                    <section className="panel">
+                      <div className="panel-heading">
+                        <h2>
+                          Weekly{" "}
+                          {section.endsWith("attendance")
+                            ? "attendance"
+                            : "giving"}
+                        </h2>
+                      </div>
+                      <TrendChart
+                        data={compareSeries()}
+                        mode={
+                          section.endsWith("attendance")
+                            ? "attendance"
+                            : "financial"
+                        }
+                      />
+                    </section>
+                    <section className="panel">
+                      <div className="panel-heading">
+                        <h2>Monthly trend & period comparison</h2>
+                      </div>
+                      <TrendChart
+                        data={compareSeries(true)}
+                        monthly
+                        mode={
+                          section.endsWith("attendance")
+                            ? "attendance"
+                            : "financial"
+                        }
+                      />
+                    </section>
+                    {section.endsWith("attendance") && (
                       <>
-                        <div className="panel">
+                        <section className="panel">
                           <div className="panel-heading">
-                            <h2>Attendance vs. giving</h2>
+                            <h2>Members & visitors</h2>
                           </div>
-                          <TrendChart data={weekly} />
-                        </div>
-                        <div className="panel">
+                          <Breakdown data={breakdown("members")} />
+                        </section>
+                        <section className="panel">
                           <div className="panel-heading">
-                            <h2>Giving per attendee trend</h2>
+                            <h2>Adults & children</h2>
                           </div>
-                          <TrendChart data={monthly} mode="perAttendee" />
-                        </div>
-                        <div className="panel metric-list">
-                          <h2>Period growth</h2>
-                          <div>
-                            <span>Attendance growth</span>
-                            <strong>{pct(attendanceGrowth)}</strong>
-                          </div>
-                          <div>
-                            <span>Giving growth</span>
-                            <strong>{pct(givingGrowth)}</strong>
-                          </div>
-                          <div>
-                            <span>Monthly Pearson correlation (r)</span>
-                            <strong>
-                              {pearson(monthly)?.toFixed(3) ??
-                                "Insufficient variation"}
-                            </strong>
-                          </div>
-                          <p className="muted">
-                            Calculated from {monthly.length} monthly
-                            observations. Correlation does not establish
-                            causation.
-                          </p>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="panel">
-                          <div className="panel-heading">
-                            <h2>
-                              Weekly{" "}
-                              {section.endsWith("attendance")
-                                ? "attendance"
-                                : "giving"}
-                            </h2>
-                          </div>
-                          <TrendChart
-                            data={compareSeries()}
-                            mode={
-                              section.endsWith("attendance")
-                                ? "attendance"
-                                : "financial"
-                            }
-                          />
-                        </div>
-                        <div className="panel">
-                          <div className="panel-heading">
-                            <h2>Monthly trend & period comparison</h2>
-                          </div>
-                          <TrendChart
-                            data={compareSeries(true)}
-                            monthly
-                            mode={
-                              section.endsWith("attendance")
-                                ? "attendance"
-                                : "financial"
-                            }
-                          />
-                        </div>
-                        {section.endsWith("attendance") ? (
-                          <>
-                            <div className="panel">
-                              <div className="panel-heading">
-                                <h2>Members & visitors</h2>
-                              </div>
-                              <Breakdown data={breakdown("members")} />
-                            </div>
-                            <div className="panel">
-                              <div className="panel-heading">
-                                <h2>Adults & children</h2>
-                              </div>
-                              <Breakdown data={breakdown("ages")} />
-                            </div>
-                          </>
-                        ) : (
-                          <div className="panel">
-                            <div className="panel-heading">
-                              <h2>Giving per attendee</h2>
-                            </div>
-                            <TrendChart data={monthly} mode="perAttendee" />
-                          </div>
-                        )}
+                          <Breakdown data={breakdown("ages")} />
+                        </section>
                       </>
                     )}
                   </div>
@@ -1471,13 +1433,23 @@ export default function Workspace({ section }: { section: string }) {
                       </p>
                     </div>
                     <div>
-                      <Link
-                        className="primary"
-                        href={`/?year=${start.slice(0, 4)}&month=${start.slice(0, 7)}&export=month&format=pptx`}
-                      >
-                        <Download size={16} />
-                        Monthly PowerPoint (.pptx)
-                      </Link>
+                      {(["attendance", "giving"] as const).map((report) => (
+                        <section className="report-export-group" key={report}>
+                          <h3>
+                            {report === "attendance" ? "Attendance" : "Giving"}
+                          </h3>
+                          <Link
+                            className="primary"
+                            href={`/?year=${start.slice(0, 4)}&month=${start.slice(0, 7)}&export=month&format=pptx&report=${report}`}
+                          >
+                            <Download size={16} />
+                            {report === "attendance"
+                              ? "Attendance"
+                              : "Giving"}{" "}
+                            PowerPoint (.pptx)
+                          </Link>
+                        </section>
+                      ))}
                       <Link
                         className="secondary"
                         href={`/?year=${start.slice(0, 4)}&month=${start.slice(0, 7)}&export=month&format=xlsx`}

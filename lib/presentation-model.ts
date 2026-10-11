@@ -1,6 +1,7 @@
 import { currency, growth, series, summary } from "./analytics";
 import { monthName, monthReport } from "./public-analytics";
 import type { TransparencyData } from "./transparency";
+export type PresentationMetric = "attendance" | "giving";
 export type ReportSlide = {
   title: string;
   period: string;
@@ -23,6 +24,7 @@ export function presentationSlides(
   data: TransparencyData,
   previousYear: TransparencyData,
   month: string,
+  report: PresentationMetric = "attendance",
 ): ReportSlide[] {
   const r = monthReport(data.records, month),
     oldMonth = `${Number(month.slice(0, 4)) - 1}-${month.slice(5)}`;
@@ -34,9 +36,9 @@ export function presentationSlides(
   const givingRecorded = r.records.some((s) => s.giving.length > 0);
   const givingStats = summary(r.records.filter((s) => s.giving.length > 0));
   const period = monthName(month);
-  const note = `Source: active service records for ${month}. Missing entries are omitted from graphs and per-recorded-service averages, rather than treated as recorded zero. Giving is in PHP. Private notes and staff identities are excluded.`;
+  const note = `Source: active ${report} records for ${month}. Missing entries are omitted from graphs and per-recorded-service averages, rather than treated as recorded zero.${report === "giving" ? " Giving is in PHP." : ""} Private notes and staff identities are excluded.`;
   const slides: ReportSlide[] = [];
-  for (const metric of ["attendance", "giving"] as const) {
+  for (const metric of [report]) {
     const title = metric === "attendance" ? "Attendance" : "Giving";
     const rows =
       metric === "attendance"
@@ -95,14 +97,6 @@ export function presentationSlides(
               givingRecorded
                 ? currency(givingStats.lowestGiving)
                 : "Not recorded",
-            ],
-            [
-              "Giving per attendee",
-              recorded && r.stats.totalAttendance && givingRecorded
-                ? currency(r.stats.givingPerAttendee)
-                : !givingRecorded
-                  ? "Not recorded"
-                  : "No attendance baseline",
             ],
           ];
     slides.push({

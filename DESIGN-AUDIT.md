@@ -49,3 +49,9 @@ Operational follow-ups:
 - Production currently has no service records, so charts containing real data and data-dependent report layout need a separate check once records are entered. Automated unit tests cover calculations and missing-data behavior.
 
 The earlier contrast scan remains a separate result. This live audit checks responsive overflow, accessible control names, visible layouts and core navigation; it is not a complete WCAG or penetration-test certification.
+
+## Separate analytics and PowerPoint reports — 11 October 2026
+
+Attendance and giving now have independent analytics navigation entries, dashboard charts, monthly PowerPoint links and three-slide previews. PowerPoint selection survives Google sign-in and is validated by the export endpoint. Filenames identify the selected report. Monthly decks contain numbers, a native chart, and last-month/last-year comparisons; annual decks contain 36 slides for one selected report. Existing combined export archives are preserved.
+
+Validation: 26 unit tests and all 11 browser tests passed against an isolated production build and temporary database over HTTPS. Additional checks exercised both selected downloads, preview isolation, invalid report rejection, Google authorization and responsive layouts at 1440px, 390px and 320px. PowerPoint rendered both sample decks, and all six slides were inspected. Arial avoids an unintended fallback for machines without Poppins. Corrected the narrow export-dialog frame and wrapped preview tables so their values remain visible on phones.

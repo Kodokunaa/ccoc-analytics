@@ -11,9 +11,18 @@ export async function GET(req: NextRequest) {
       .regex(/^(199\d|20\d\d|2100)-(0[1-9]|1[0-2])$/)
       .parse(req.nextUrl.searchParams.get("month"));
     const source = await reportSource(month);
+    const report = z
+      .enum(["attendance", "giving"])
+      .parse(req.nextUrl.searchParams.get("report") ?? "attendance");
     return NextResponse.json(
       {
-        slides: presentationSlides(source.data, source.previousYear, month),
+        slides: presentationSlides(
+          source.data,
+          source.previousYear,
+          month,
+          report,
+        ),
+        report,
         churchName: source.data.churchName,
         approved: source.approved,
       },

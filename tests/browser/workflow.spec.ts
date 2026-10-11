@@ -253,7 +253,7 @@ test("Monthly review protects Sundays, snapshots comparisons, restores archives,
     const slides = await (
       await request.get(`/api/report-preview?month=${month}`)
     ).json();
-    expect(slides.slides).toHaveLength(6);
+    expect(slides.slides).toHaveLength(3);
     expect(slides.approved).toBe(true);
     expect(slides.slides[2].rows[3][1]).toBe("10");
     expect(JSON.stringify(slides)).not.toContain("Private workflow notes");
@@ -302,7 +302,7 @@ test("Monthly review protects Sundays, snapshots comparisons, restores archives,
     await page.getByLabel("Month", { exact: true }).selectOption("02");
     await expect(page.getByText("Monthly review · 2024-02")).toBeVisible();
     await page
-      .getByRole("button", { name: "Preview monthly PowerPoint" })
+      .getByRole("button", { name: "Preview attendance PowerPoint" })
       .click();
     await expect(
       page.getByRole("region", { name: "PowerPoint content preview" }),

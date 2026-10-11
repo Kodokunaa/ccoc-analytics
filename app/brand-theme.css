@@ -2,6 +2,51 @@
 .dashboard-charts.single-chart {
   grid-template-columns: minmax(0, 1fr);
 }
+.dashboard-charts.separate-trends {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.report-export-group {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.modal-backdrop {
+  grid-template-columns: minmax(0, 1fr);
+}
+.public-export-modal {
+  min-width: 0;
+  justify-self: center;
+  width: min(570px, 100%);
+}
+.public-export-body > label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+.public-export-body select {
+  min-width: 0;
+  width: 100%;
+}
+.public-export-modal .google-button {
+  white-space: normal;
+  text-align: center;
+}
+.slide-preview table {
+  table-layout: fixed;
+  min-width: 0;
+  width: 100%;
+}
+.slide-preview th,
+.slide-preview td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 900px) {
+  .dashboard-charts.separate-trends {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .operations-panel {
   margin-top: 24px;
   padding: 28px;

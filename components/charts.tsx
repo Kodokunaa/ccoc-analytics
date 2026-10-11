@@ -26,6 +26,7 @@ export function TrendChart({
   data,
   mode = "combined",
   monthly = false,
+  comparison = true,
 }: {
   data: {
     name: string;
@@ -37,6 +38,7 @@ export function TrendChart({
   }[];
   mode?: "attendance" | "financial" | "combined" | "perAttendee";
   monthly?: boolean;
+  comparison?: boolean;
 }) {
   if (!data.length)
     return (
@@ -102,7 +104,7 @@ export function TrendChart({
               maxBarSize={38}
             />
           )}{" "}
-          {mode === "attendance" && !monthly && (
+          {mode === "attendance" && !monthly && comparison && (
             <Bar
               isAnimationActive={false}
               yAxisId="attendance"
@@ -124,16 +126,18 @@ export function TrendChart({
                 stroke="#c44f00"
                 strokeWidth={3}
               />
-              <Line
-                isAnimationActive={false}
-                yAxisId="attendance"
-                dataKey="previousAttendance"
-                name="Comparison attendance"
-                strokeDasharray="6 4"
-                type="monotone"
-                stroke="#007f78"
-                strokeWidth={2}
-              />
+              {comparison && (
+                <Line
+                  isAnimationActive={false}
+                  yAxisId="attendance"
+                  dataKey="previousAttendance"
+                  name="Comparison attendance"
+                  strokeDasharray="6 4"
+                  type="monotone"
+                  stroke="#007f78"
+                  strokeWidth={2}
+                />
+              )}
             </>
           )}
           {(mode === "combined" || (mode === "financial" && monthly)) && (
@@ -159,18 +163,20 @@ export function TrendChart({
                 radius={[5, 5, 0, 0]}
                 maxBarSize={38}
               />
-              <Bar
-                isAnimationActive={false}
-                yAxisId="attendance"
-                dataKey="previousGiving"
-                name="Comparison giving (PHP)"
-                fill="#c44f00"
-                radius={[5, 5, 0, 0]}
-                maxBarSize={38}
-              />
+              {comparison && (
+                <Bar
+                  isAnimationActive={false}
+                  yAxisId="attendance"
+                  dataKey="previousGiving"
+                  name="Comparison giving (PHP)"
+                  fill="#c44f00"
+                  radius={[5, 5, 0, 0]}
+                  maxBarSize={38}
+                />
+              )}
             </>
           )}
-          {mode === "financial" && monthly && (
+          {mode === "financial" && monthly && comparison && (
             <Line
               isAnimationActive={false}
               yAxisId="attendance"

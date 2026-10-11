@@ -31,17 +31,18 @@ test("PowerPoint distinguishes missing giving from explicitly recorded zero", ()
     logo: "",
     lastUpdated: null,
   };
-  const missing = presentationSlides(data, data, "2024-02");
-  assert.equal(missing[3].rows![1][1], "Not recorded");
-  assert.equal(missing[4].empty, "No giving recorded for this month");
-  assert.equal(missing[5].rows![1][1], "Not recorded");
+  const missing = presentationSlides(data, data, "2024-02", "giving");
+  assert.equal(missing[0].rows![1][1], "Not recorded");
+  assert.equal(missing[1].empty, "No giving recorded for this month");
+  assert.equal(missing[2].rows![1][1], "Not recorded");
   const zero = presentationSlides(
     { ...data, records: [record("2024-02-04")] },
     data,
     "2024-02",
+    "giving",
   );
-  assert.equal(zero[4].chart!.values[0], 0);
-  assert.notEqual(zero[3].rows![1][1], "Not recorded");
+  assert.equal(zero[1].chart!.values[0], 0);
+  assert.notEqual(zero[0].rows![1][1], "Not recorded");
 });
 test("Completeness distinguishes missing Sunday records, explicit zero, and future Sundays", () => {
   const rows = ["2024-02-04", "2024-02-11", "2024-02-18", "2024-02-25"].map(
