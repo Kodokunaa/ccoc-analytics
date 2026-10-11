@@ -386,6 +386,29 @@ body .public-tabs button.active:hover {
 .disclosure-panel[open] > summary {
   margin-bottom: 16px;
 }
+.public-comparison.disclosure-panel > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 20px;
+  list-style: none;
+}
+.public-comparison > summary::-webkit-details-marker {
+  display: none;
+}
+.public-comparison > summary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 7px solid currentColor;
+}
+.public-comparison[open] > summary::after {
+  transform: rotate(90deg);
+}
 .disclosure-panel > .operations-panel {
   margin-top: 0;
 }
