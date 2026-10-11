@@ -145,7 +145,7 @@ npm run build
 npm start
 ```
 
-Deploy to a Node.js server or compatible Next.js host connected to a managed PostgreSQL database. Configure real environment variables and a HTTPS reverse proxy. Production session cookies are Secure; plain HTTP production logins will not persist. Set a report font path on Linux for correct Peso glyphs. Ensure the public origin received by Next.js matches your proxy's forwarded host/protocol configuration. Only enable TRUST_PROXY when that proxy overwrites forwarded IP headers.
+Deploy to a Node.js server or compatible Next.js host connected to a managed PostgreSQL database. Configure real environment variables and a HTTPS reverse proxy. Production session cookies are Secure; plain HTTP production logins will not persist. PDF currency labels use PHP so they render with the bundled standard font; REPORT_FONT_PATH can optionally select a host-installed font. Ensure the public origin received by Next.js matches your proxy's forwarded host/protocol configuration. Only enable TRUST_PROXY when that proxy overwrites forwarded IP headers.
 
 Use a separate database for production. Set `SEED_SAMPLE_DATA=false` before running `npm run db:seed` to create the initial admin, roles, and settings without example service data. Back up PostgreSQL, restrict database access, and configure log retention at the host.
 

@@ -35,8 +35,10 @@ export function monthReport(records: RecordData[], month: string) {
       current.some((r) => r.attendance !== null)
         ? growth(stats.totalAttendance, previousStats.totalAttendance)
         : null,
-    givingGrowth: previous.length
-      ? growth(stats.totalGiving, previousStats.totalGiving)
-      : null,
+    givingGrowth:
+      previous.some((r) => r.giving.length > 0) &&
+      current.some((r) => r.giving.length > 0)
+        ? growth(stats.totalGiving, previousStats.totalGiving)
+        : null,
   };
 }

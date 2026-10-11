@@ -228,6 +228,17 @@ button:disabled {
 .empty h3 {
   color: #365e57;
 }
+.chart.empty {
+  height: auto;
+  min-height: 160px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.chart.empty p {
+  margin-bottom: 0;
+}
 input::placeholder {
   color: #69716f;
   opacity: 1;

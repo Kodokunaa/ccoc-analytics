@@ -472,7 +472,9 @@ export default function Transparency({
                     "Giving per attendee",
                     currency(stats.givingPerAttendee),
                     stats.totalAttendance > 0 &&
-                      report.previousStats.totalAttendance > 0
+                      report.previousStats.totalAttendance > 0 &&
+                      report.records.some((r) => r.giving.length > 0) &&
+                      report.previousRecords.some((r) => r.giving.length > 0)
                       ? growth(
                           stats.givingPerAttendee,
                           report.previousStats.givingPerAttendee,

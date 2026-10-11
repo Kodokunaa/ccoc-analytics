@@ -275,6 +275,18 @@ export default function Workspace({ section }: { section: string }) {
     prior = useMemo(() => summary(previous), [previous]),
     weekly = useMemo(() => series(filtered), [filtered]),
     monthly = useMemo(() => series(filtered, "monthly"), [filtered]);
+  const hasAttendanceComparison =
+      filtered.some((s) => s.attendance !== null) &&
+      previous.some((s) => s.attendance !== null),
+    hasGivingComparison =
+      filtered.some((s) => s.giving.length > 0) &&
+      previous.some((s) => s.giving.length > 0),
+    attendanceGrowth = hasAttendanceComparison
+      ? growth(stats.totalAttendance, prior.totalAttendance)
+      : null,
+    givingGrowth = hasGivingComparison
+      ? growth(stats.totalGiving, prior.totalGiving)
+      : null;
   const compareSeries = (monthlyMode = false) => {
     return comparisonSeries(
       filtered,
@@ -995,31 +1007,40 @@ export default function Workspace({ section }: { section: string }) {
                     {kpi(
                       "Total attendance",
                       stats.totalAttendance.toLocaleString(),
-                      growth(stats.totalAttendance, prior.totalAttendance),
+                      attendanceGrowth,
                       <Users size={19} />,
                       "vs. comparison",
                     )}
                     {kpi(
                       "Total giving",
                       currency(stats.totalGiving),
-                      growth(stats.totalGiving, prior.totalGiving),
+                      givingGrowth,
                       <Wallet size={19} />,
                       "vs. comparison",
                     )}
                     {kpi(
                       "Avg. weekly attendance",
                       stats.averageWeeklyAttendance.toFixed(2),
-                      growth(
-                        stats.averageWeeklyAttendance,
-                        prior.averageWeeklyAttendance,
-                      ),
+                      hasAttendanceComparison
+                        ? growth(
+                            stats.averageWeeklyAttendance,
+                            prior.averageWeeklyAttendance,
+                          )
+                        : null,
                       <CalendarDays size={19} />,
                       "vs. comparison",
                     )}
                     {kpi(
                       "Giving per attendee",
                       currency(stats.givingPerAttendee),
-                      growth(stats.givingPerAttendee, prior.givingPerAttendee),
+                      hasGivingComparison &&
+                        stats.totalAttendance > 0 &&
+                        prior.totalAttendance > 0
+                        ? growth(
+                            stats.givingPerAttendee,
+                            prior.givingPerAttendee,
+                          )
+                        : null,
                       <HeartHandshake size={19} />,
                       "vs. comparison",
                     )}
@@ -1078,22 +1099,11 @@ export default function Workspace({ section }: { section: string }) {
                           <h2>Period growth</h2>
                           <div>
                             <span>Attendance growth</span>
-                            <strong>
-                              {pct(
-                                growth(
-                                  stats.totalAttendance,
-                                  prior.totalAttendance,
-                                ),
-                              )}
-                            </strong>
+                            <strong>{pct(attendanceGrowth)}</strong>
                           </div>
                           <div>
                             <span>Giving growth</span>
-                            <strong>
-                              {pct(
-                                growth(stats.totalGiving, prior.totalGiving),
-                              )}
-                            </strong>
+                            <strong>{pct(givingGrowth)}</strong>
                           </div>
                           <div>
                             <span>Monthly Pearson correlation (r)</span>

@@ -27,3 +27,25 @@ This audit covers rendered HTML text, responsive layout and core controls. Chart
 
 Validation: lint and TypeScript checks passed; all 22 unit tests and 11 browser tests passed. Browser tests ran against an isolated temporary database.
 Production build passed.
+
+## Live website audit — 11 October 2026
+
+Reviewed the deployed public overview, monthly reports, service records, comparison disclosure, export dialog, sign-in and recovery pages, plus the current staff sections at 1440px, 390px and 320px. Staff screenshots were captured after the loading placeholder cleared. Audit artifacts are in the ignored `test-results/live-audit` directory. No church records were created or modified by these checks.
+
+Corrections:
+
+- Empty trend charts now use a compact layout and neutral wording appropriate for guests as well as staff.
+- Staff attendance and giving growth now show "No baseline" when either period lacks recorded data. Public giving comparisons and giving-per-attendee comparisons follow the same rule. An explicitly recorded zero remains valid data.
+- Staff PDF chart labels use PHP instead of a peso glyph that the standard PDF font cannot render on Linux hosts without an additional font.
+- The previous correction places the monthly comparison triangle at the right with 20px edge padding and a 16px text gap, preserving keyboard expansion.
+
+Validation: lint, TypeScript and 23 unit tests passed, including a new regression covering missing giving versus explicit zero. The revised empty chart layout passed browser checks at all three widths. Live checks exercise administrator login/logout, export dialog Escape dismissal and the configured password-reset endpoint without sending email.
+
+Operational follow-ups:
+
+- Vercel authentication protection still restricts public access to the production URL. It must be removed when the church is ready for public viewing.
+- A complete Google sign-in/download journey and actual Resend delivery still require verification with real accounts. The audit did not send email or call Manus.
+- The local backup script loads `.env`; this audit does not establish that Supabase production backups are scheduled or that a production restore has been tested.
+- Production currently has no service records, so charts containing real data and data-dependent report layout need a separate check once records are entered. Automated unit tests cover calculations and missing-data behavior.
+
+The earlier contrast scan remains a separate result. This live audit checks responsive overflow, accessible control names, visible layouts and core navigation; it is not a complete WCAG or penetration-test certification.

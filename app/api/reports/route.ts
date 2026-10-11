@@ -4,13 +4,7 @@ import { existsSync } from "node:fs";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/auth";
 import { requireGoogleViewer } from "@/lib/google";
-import {
-  summary,
-  series,
-  growth,
-  currency,
-  type RecordData,
-} from "@/lib/analytics";
+import { summary, series, growth, type RecordData } from "@/lib/analytics";
 import { z } from "zod";
 import { comparisonWindow } from "@/lib/periods";
 import { auditContext } from "@/lib/audit";
@@ -103,7 +97,8 @@ export async function GET(req: NextRequest) {
       ["Lowest giving (PHP)", stats.lowestGiving],
       [
         "Giving growth (%)",
-        (previous.length
+        (records.some((s) => s.giving.length > 0) &&
+        previous.some((s) => s.giving.length > 0)
           ? growth(stats.totalGiving, prior.totalGiving)
           : null) ?? "No baseline",
       ],
@@ -263,7 +258,12 @@ export async function GET(req: NextRequest) {
               align: "center",
             });
           pdf.text(
-            key === "giving" ? currency(p[key]) : String(p[key]),
+            key === "giving"
+              ? `PHP ${p[key].toLocaleString("en-PH", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`
+              : String(p[key]),
             left + i * step,
             bottom - barHeight - 14,
             { width: step, align: "center" },

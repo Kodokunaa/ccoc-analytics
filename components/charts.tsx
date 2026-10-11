@@ -42,7 +42,7 @@ export function TrendChart({
     return (
       <div className="chart empty">
         <h3>No trend data</h3>
-        <p>Add service records or select another period.</p>
+        <p>No records for this period. Select another period to view trends.</p>
       </div>
     );
   return (

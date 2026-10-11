@@ -60,3 +60,31 @@ test("Missing attendance stays distinct from zero and money totals preserve cent
   records[1].serviceDate = records[0].serviceDate;
   assert.equal(series(records)[0].giving, 0.3);
 });
+test("Giving growth requires recorded giving in both months, including explicit zero", () => {
+  const previous = service("2025-12-28", 10, 100);
+  const current = service("2026-01-04", 10, 0);
+  assert.equal(monthReport([previous, current], "2026-01").givingGrowth, -100);
+  assert.equal(
+    monthReport([previous, { ...current, giving: [] }], "2026-01").givingGrowth,
+    null,
+  );
+  assert.equal(
+    monthReport([{ ...previous, giving: [] }, current], "2026-01").givingGrowth,
+    null,
+  );
+  assert.equal(
+    monthReport(
+      [
+        { ...previous, giving: [] },
+        { ...current, giving: [] },
+      ],
+      "2026-01",
+    ).givingGrowth,
+    null,
+  );
+  assert.equal(
+    monthReport([service("2025-12-28", 10, 0), current], "2026-01")
+      .givingGrowth,
+    0,
+  );
+});
