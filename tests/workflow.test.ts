@@ -22,6 +22,7 @@ const record = (date: string): RecordData => ({
 });
 test("PowerPoint distinguishes missing giving from explicitly recorded zero", () => {
   const data: TransparencyData = {
+    campaign: [],
     records: [{ ...record("2024-02-04"), giving: [] }],
     months: [],
     years: [2024],

@@ -34,7 +34,7 @@ export async function getTransparency(
   const query = publicQuerySchema
     .extend({ year: z.number().int().min(1989).max(2100) })
     .parse({ year });
-  const [services, dates, settings, updated] = await Promise.all([
+  const [services, dates, settings, updated, campaign] = await Promise.all([
     client.service.findMany({
       where: {
         deletedAt: null,
@@ -60,10 +60,20 @@ export async function getTransparency(
         UNION ALL SELECT MAX(a."updatedAt") FROM "AttendanceRecord" a JOIN "Service" s ON a."serviceId" = s.id WHERE s."deletedAt" IS NULL
         UNION ALL SELECT MAX(g."updatedAt") FROM "GivingRecord" g JOIN "Service" s ON g."serviceId" = s.id WHERE s."deletedAt" IS NULL
         UNION ALL SELECT MAX("updatedAt") FROM "AppSetting" WHERE key IN ('churchName', 'churchAddress', 'logo')
+        UNION ALL SELECT MAX("createdAt") FROM "CapitalCampaignEntry"
       ) changes`,
+    client.capitalCampaignEntry.findMany({
+      where: { year: { lte: year } },
+      orderBy: [{ year: "asc" }, { month: "asc" }, { id: "asc" }],
+      select: { id: true, year: true, month: true, label: true, amount: true },
+    }),
   ]);
   const records = JSON.parse(JSON.stringify(services)) as RecordData[];
   return {
+    campaign: campaign.map((entry) => ({
+      ...entry,
+      amount: entry.amount.toString(),
+    })),
     records,
     months: Array.from({ length: 12 }, (_, i) =>
       (() => {
@@ -81,9 +91,13 @@ export async function getTransparency(
         return metrics;
       })(),
     ),
-    years: Array.from(new Set([year, ...dates.map((d) => d.year)])).sort(
-      (a, b) => b - a,
-    ),
+    years: Array.from(
+      new Set([
+        year,
+        ...dates.map((d) => d.year),
+        ...campaign.map((e) => e.year),
+      ]),
+    ).sort((a, b) => b - a),
     latestMonth:
       dates[0]?.latest.toISOString().slice(0, 7) ??
       new Intl.DateTimeFormat("en-CA", {

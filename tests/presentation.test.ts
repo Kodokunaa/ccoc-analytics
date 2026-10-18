@@ -31,6 +31,7 @@ const records = [
   record("2026-01-11", 123, 3475.25),
 ];
 const data: TransparencyData = {
+  campaign: [],
   records,
   months: Array.from({ length: 12 }, (_, i) =>
     monthReport(records, `2026-${String(i + 1).padStart(2, "0")}`),

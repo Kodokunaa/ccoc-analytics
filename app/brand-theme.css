@@ -606,7 +606,56 @@ td summary,
 .public-footer {
   font-size: 11px;
 }
+.capital-campaign .kpi-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.capital-campaign .kpi {
+  min-height: 0;
+}
+.capital-campaign table {
+  table-layout: fixed;
+  white-space: normal;
+}
+.capital-campaign th,
+.capital-campaign td {
+  padding: 14px 8px;
+  overflow-wrap: anywhere;
+}
+.capital-campaign th:last-child,
+.capital-campaign td:last-child {
+  width: 36%;
+  white-space: nowrap;
+  text-align: right;
+}
+.capital-campaign td {
+  font-size: 13px;
+}
+.capital-campaign details {
+  margin-top: 16px;
+}
+.capital-campaign summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  cursor: pointer;
+  list-style: none;
+}
+.capital-campaign summary::-webkit-details-marker {
+  display: none;
+}
+.capital-campaign summary::after {
+  content: "▾";
+  flex-shrink: 0;
+}
+.capital-campaign details[open] summary::after {
+  content: "▴";
+}
 @media (max-width: 700px) {
+  .capital-campaign .kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .login {
     grid-template-columns: minmax(0, 1fr);
   }

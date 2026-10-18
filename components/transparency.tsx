@@ -24,6 +24,7 @@ import {
 import { TrendChart } from "./lazy-charts";
 import GoogleMark from "./google-mark";
 import ChurchLogo from "./church-logo";
+import CapitalCampaign from "./capital-campaign";
 import type { TransparencyData } from "@/lib/transparency";
 import { monthReport, monthName } from "@/lib/public-analytics";
 import { currency, series, growth } from "@/lib/analytics";
@@ -333,24 +334,26 @@ export default function Transparency({
               explore.
             </p>
           </div>
-          <div className="public-export-actions">
-            <button
-              className="primary"
-              onClick={() => {
-                setScope(
-                  tab === "monthly"
-                    ? "year"
-                    : tab === "records"
-                      ? "data"
-                      : "month",
-                );
-                setExportOpen(true);
-              }}
-            >
-              <Download size={16} />
-              Export report
-            </button>
-          </div>
+          {tab !== "campaign" && (
+            <div className="public-export-actions">
+              <button
+                className="primary"
+                onClick={() => {
+                  setScope(
+                    tab === "monthly"
+                      ? "year"
+                      : tab === "records"
+                        ? "data"
+                        : "month",
+                  );
+                  setExportOpen(true);
+                }}
+              >
+                <Download size={16} />
+                Export report
+              </button>
+            </div>
+          )}
         </div>
         <LazyMotion features={domAnimation}>
           <nav className="public-tabs" aria-label="Transparency views">
@@ -358,6 +361,7 @@ export default function Transparency({
               ["overview", "Overview"],
               ["monthly", "Monthly reports"],
               ["records", "Service records"],
+              ["campaign", "Capital campaign"],
             ].map(([key, title]) => (
               <button
                 aria-current={tab === key ? "page" : undefined}
@@ -405,7 +409,7 @@ export default function Transparency({
               ))}
             </select>
           </label>
-          {tab !== "monthly" && (
+          {tab !== "monthly" && tab !== "campaign" && (
             <label>
               Month
               <select
@@ -441,14 +445,19 @@ export default function Transparency({
             <div className="section-caption">
               <span>
                 <span className="live-dot" />
-                {tab === "monthly"
-                  ? `${year} MONTHLY REPORTS`
-                  : report.title.toUpperCase()}
+                {tab === "campaign"
+                  ? `${year} CAPITAL CAMPAIGN`
+                  : tab === "monthly"
+                    ? `${year} MONTHLY REPORTS`
+                    : report.title.toUpperCase()}
               </span>
-              {tab !== "monthly" && (
+              {tab !== "monthly" && tab !== "campaign" && (
                 <span>{report.services} services recorded</span>
               )}
             </div>
+            {tab === "campaign" && (
+              <CapitalCampaign entries={data.campaign} year={year} />
+            )}
             {tab === "overview" && (
               <>
                 <div className="kpi-grid">

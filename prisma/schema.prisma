@@ -245,3 +245,16 @@ model ManusReportTask {
 
   @@index([month, createdAt])
 }
+
+// Monthly campaign totals are independent of Sunday service offerings.
+model CapitalCampaignEntry {
+  id        String   @id
+  year      Int
+  month     Int?
+  label     String
+  amount    Decimal  @db.Decimal(14, 2)
+  source    String
+  createdAt DateTime @default(now())
+
+  @@index([year, month])
+}

@@ -4,6 +4,16 @@ A full-stack application for service records, attendance, Philippine Peso giving
 
 ## Features
 
+- Separate public Capital campaign view with monthly faith pledge entries and prior-year savings. These amounts never contribute to Sunday giving totals or exports.
+
+## Importing the supplied 2026 ledger
+
+Run migrations first, then `npm run db:seed:ledger -- --env-file=.env.production` to preview and add `--apply` to import. This dedicated import does not change passwords or run development sample seeds. It creates nine attendance records and twelve independent campaign entries, logs the additions, and skips identical records on rerun. Conflicts roll back the entire import. Unknown attendance breakdowns remain unclassified; visitor names are not imported.
+
+The supplied campaign items total PHP 61,100, while the handwritten total states PHP 61,150. The app displays this unresolved PHP 50 discrepancy without creating a balancing transaction. Prior-year savings total PHP 19,114, giving a calculated balance of PHP 80,214.
+
+## Application features
+
 - Responsive dashboard, collapsible mobile navigation, filters, search, tables, pagination, loading and empty states.
 - Email/password authentication with bcrypt, opaque database sessions, HTTP-only cookies, logout and account-level login throttling.
 - Live role checks, inactive account blocking, session revocation on user changes, and origin checks for mutations.

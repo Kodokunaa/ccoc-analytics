@@ -28,6 +28,7 @@ const connection = [
 ];
 const env = { ...process.env, PGPASSWORD: decodeURIComponent(dbUrl.password) };
 const tables = [
+  "CapitalCampaignEntry",
   "Service",
   "AttendanceRecord",
   "GivingRecord",
