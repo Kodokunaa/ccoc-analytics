@@ -69,6 +69,12 @@ export default function Transparency({
     [downloading, setDownloading] = useState(false),
     [notice, setNotice] = useState(""),
     [exportOpen, setExportOpen] = useState(initialExportOpen),
+    [exportMonth, setExportMonth] = useState(initialMonth),
+    [exportNotice, setExportNotice] = useState(""),
+    [downloadFile, setDownloadFile] = useState<{
+      url: string;
+      filename: string;
+    } | null>(null),
     [scope, setScope] = useState<"data" | "month" | "year">(
       initialFormat === "pptx" && initialScope === "data"
         ? "month"
@@ -82,8 +88,19 @@ export default function Transparency({
     [page, setPage] = useState(1);
   const modalRef = useRef<HTMLElement>(null),
     sequence = useRef(0);
+  const exportStatusRef = useRef<HTMLDivElement>(null);
   const entranceRoot = useRef<HTMLElement>(null);
   const reducedMotion = useReducedMotion();
+  const exportYear = Number(exportMonth.slice(0, 4));
+  useEffect(() => {
+    if (exportNotice)
+      exportStatusRef.current?.scrollIntoView({ block: "nearest" });
+  }, [exportNotice]);
+  useEffect(() => {
+    return () => {
+      if (downloadFile) URL.revokeObjectURL(downloadFile.url);
+    };
+  }, [downloadFile]);
   useDashboardEntrance(entranceRoot, `${tab}:${month}`);
   useEffect(() => {
     if (!exportOpen) return;
@@ -96,7 +113,11 @@ export default function Transparency({
       );
     buttons()[0]?.focus();
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setExportOpen(false);
+      if (
+        e.key === "Escape" &&
+        modalRef.current?.getAttribute("aria-busy") !== "true"
+      )
+        setExportOpen(false);
       if (e.key === "Tab") {
         const items = buttons();
         if (e.shiftKey && document.activeElement === items[0]) {
@@ -147,32 +168,43 @@ export default function Transparency({
     pages = Math.max(1, Math.ceil(rows.length / 10)),
     currentPage = Math.min(page, pages);
   const currentPath = `/?month=${month}&year=${year}`;
+  function clearExportResult() {
+    setExportNotice("");
+    setDownloadFile(null);
+  }
   async function download() {
     if (!viewer) return;
     setDownloading(true);
-    setNotice("");
+    setExportNotice("");
+    setDownloadFile(null);
     try {
       const response = await fetch(
-        `/api/transparency/export?scope=${scope}&year=${year}&month=${month}&format=${format}&report=${reportType}`,
+        `/api/transparency/export?scope=${scope}&year=${exportYear}&month=${exportMonth}&format=${format}&report=${reportType}`,
+        { signal: AbortSignal.timeout(120000) },
       );
       if (!response.ok) {
-        const body = await response.json();
+        const body = await response.json().catch(() => null);
         if (response.status === 401) setViewer(null);
-        throw new Error(body.error);
+        throw new Error(
+          body?.error || "Unable to prepare the report. Please try again.",
+        );
       }
       const url = URL.createObjectURL(await response.blob()),
         anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = `city-church-${format === "pptx" ? `${reportType}-` : ""}${scope === "year" ? `${year}-monthly-reports` : `${month}-${scope}`}.${format}`;
+      anchor.download = `city-church-${format === "pptx" ? `${reportType}-` : ""}${scope === "year" ? `${exportYear}-monthly-reports` : `${exportMonth}-${scope}`}.${format}`;
+      setDownloadFile({ url, filename: anchor.download });
+      document.body.appendChild(anchor);
       anchor.click();
-      URL.revokeObjectURL(url);
-      setExportOpen(false);
-      setNotice(
-        `Your ${format === "pptx" ? "PowerPoint" : "Excel"} report is ready.`,
+      anchor.remove();
+      setExportNotice(
+        "Your report is ready. Check your browser’s downloads. If it didn’t save, use the link below.",
       );
     } catch (error) {
-      setNotice(
-        error instanceof Error ? error.message : "Unable to download report",
+      setExportNotice(
+        error instanceof Error && error.name !== "TimeoutError"
+          ? error.message
+          : "The report took too long to prepare. Please try again.",
       );
     } finally {
       setDownloading(false);
@@ -342,10 +374,13 @@ export default function Transparency({
               <button
                 className="primary"
                 onClick={() => {
+                  setExportMonth(month);
+                  setExportNotice("");
+                  setDownloadFile(null);
                   setScope(
                     tab === "monthly"
                       ? "year"
-                      : tab === "records"
+                      : tab === "records" && format === "xlsx"
                         ? "data"
                         : "month",
                   );
@@ -752,6 +787,7 @@ export default function Transparency({
             className="panel modal public-export-modal"
             role="dialog"
             aria-modal="true"
+            aria-busy={downloading}
             aria-labelledby="export-title"
           >
             <div className="panel-heading">
@@ -773,14 +809,16 @@ export default function Transparency({
                 File format
                 <select
                   aria-label="File format"
+                  disabled={downloading}
                   value={format}
                   onChange={(e) => {
+                    clearExportResult();
                     setFormat(e.target.value as typeof format);
                     if (e.target.value === "pptx") setScope("month");
                   }}
                 >
                   <option value="xlsx">Excel (.xlsx)</option>
-                  <option value="pptx">Monthly PowerPoint (.pptx)</option>
+                  <option value="pptx">PowerPoint (.pptx)</option>
                 </select>
               </label>
               {format === "pptx" && (
@@ -788,10 +826,12 @@ export default function Transparency({
                   Report type
                   <select
                     aria-label="Report type"
+                    disabled={downloading}
                     value={reportType}
-                    onChange={(e) =>
-                      setReportType(e.target.value as typeof reportType)
-                    }
+                    onChange={(e) => {
+                      clearExportResult();
+                      setReportType(e.target.value as typeof reportType);
+                    }}
                   >
                     <option value="attendance">Attendance</option>
                     <option value="giving">Giving</option>
@@ -803,18 +843,68 @@ export default function Transparency({
                 Export contents
                 <select
                   aria-label="Export contents"
+                  disabled={downloading}
                   value={scope}
-                  onChange={(e) => setScope(e.target.value as typeof scope)}
+                  onChange={(e) => {
+                    clearExportResult();
+                    setScope(e.target.value as typeof scope);
+                  }}
                 >
-                  <option value="month">Monthly report · {report.title}</option>
-                  <option value="year">Reports for every month · {year}</option>
+                  <option value="month">One month</option>
+                  <option value="year">Every month in a year</option>
                   {format === "xlsx" && (
                     <option value="data">
-                      Attendance & giving data · {report.title}
+                      Attendance & giving data for one month
                     </option>
                   )}
                 </select>
               </label>
+              <label>
+                Export year
+                <select
+                  aria-label="Export year"
+                  disabled={downloading}
+                  value={exportYear}
+                  onChange={(e) => {
+                    clearExportResult();
+                    setExportMonth(`${e.target.value}-${exportMonth.slice(5)}`);
+                  }}
+                >
+                  {Array.from({ length: 111 }, (_, i) => 2100 - i).map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {scope !== "year" && (
+                <label>
+                  Export month
+                  <select
+                    aria-label="Export month"
+                    disabled={downloading}
+                    value={exportMonth.slice(5)}
+                    onChange={(e) => {
+                      clearExportResult();
+                      setExportMonth(`${exportYear}-${e.target.value}`);
+                    }}
+                  >
+                    {Array.from({ length: 12 }, (_, i) =>
+                      String(i + 1).padStart(2, "0"),
+                    ).map((m) => (
+                      <option key={m} value={m}>
+                        {monthName(`${exportYear}-${m}`).replace(/ \d{4}$/, "")}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <p className="signin-note">
+                Selected period:{" "}
+                {scope === "year"
+                  ? `January–December ${exportYear}`
+                  : monthName(exportMonth)}
+              </p>
               <div className="export-description">
                 <FileSpreadsheet size={26} />
                 <div>
@@ -851,9 +941,11 @@ export default function Transparency({
                     ) : (
                       <Download size={17} />
                     )}
-                    {format === "pptx"
-                      ? "Download PowerPoint"
-                      : "Download XLSX"}
+                    {downloading
+                      ? "Preparing report…"
+                      : format === "pptx"
+                        ? "Download PowerPoint"
+                        : "Download XLSX"}
                   </button>
                 </>
               ) : (
@@ -867,7 +959,7 @@ export default function Transparency({
                   </div>
                   <Link
                     className="google-button"
-                    href={`/signin?next=${encodeURIComponent(`${currentPath}&export=${scope}&format=${format}&report=${reportType}`)}`}
+                    href={`/signin?next=${encodeURIComponent(`/?month=${exportMonth}&year=${exportYear}&export=${scope}&format=${format}&report=${reportType}`)}`}
                   >
                     <GoogleMark />
                     Continue with Google
@@ -879,6 +971,26 @@ export default function Transparency({
                     </p>
                   )}
                 </>
+              )}
+              {exportNotice && (
+                <div
+                  ref={exportStatusRef}
+                  className="public-notice"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {exportNotice}
+                  {downloadFile && (
+                    <p>
+                      <a
+                        href={downloadFile.url}
+                        download={downloadFile.filename}
+                      >
+                        Save file again · {downloadFile.filename}
+                      </a>
+                    </p>
+                  )}
+                </div>
               )}
               <small>
                 Only public attendance and giving data is included. Private

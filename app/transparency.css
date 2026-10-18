@@ -242,6 +242,17 @@
   line-height: 1.7;
   margin-top: 19px;
 }
+.public-export-body .public-notice {
+  display: block;
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+.public-export-body .public-notice a {
+  text-decoration: underline;
+}
+.public-export-body .public-notice p {
+  margin-top: 10px;
+}
 .export-signin-note {
   display: flex;
   gap: 10px;

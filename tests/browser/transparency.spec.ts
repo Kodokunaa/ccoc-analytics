@@ -199,6 +199,13 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
   expect((await download).suggestedFilename()).toBe(
     "city-church-2026-01-month.xlsx",
   );
+  await expect(page.getByRole("dialog").getByRole("status")).toContainText(
+    "Your report is ready",
+  );
+  await expect(
+    page.getByRole("link", { name: /Save file again/ }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Close export" }).click();
   expect(
     await db.publicExportLog.count({ where: { viewerId: viewer.id } }),
   ).toBe(3);
@@ -216,6 +223,7 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
   expect((await pptDownload).suggestedFilename()).toBe(
     "city-church-attendance-2026-01-month.pptx",
   );
+  await page.getByRole("button", { name: "Close export" }).click();
   const presentation = await api.get(
     "/api/transparency/export?scope=month&year=2026&month=2026-01&format=pptx",
   );
@@ -282,4 +290,107 @@ test("Guests browse monthly reports; Google sessions unlock downloads but never 
       )
     ).status(),
   ).toBe(401);
+});
+
+test("Export picker preserves a chosen month and year, shows failures, and keeps a reusable download link", async ({
+  page,
+}) => {
+  const token = randomBytes(32).toString("hex");
+  const viewer = await db.googleViewer.create({
+    data: {
+      googleSubject: `period-fixture-${Date.now()}`,
+      email: "period-test@example.test",
+      name: "Export period fixture",
+    },
+  });
+  viewerIds.push(viewer.id);
+  await db.googleViewerSession.create({
+    data: {
+      id: createHash("sha256").update(token).digest("hex"),
+      viewerId: viewer.id,
+      expiresAt: new Date(Date.now() + 3600000),
+    },
+  });
+  await page.context().addCookies([
+    {
+      name: "ccoc_google_session",
+      value: token,
+      url: "http://localhost:3000",
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
+  await page.goto(
+    "/?month=2026-01&year=2026&export=month&format=pptx&report=both",
+  );
+  await page.getByLabel("Export year", { exact: true }).selectOption("2025");
+  await page.getByLabel("Export month", { exact: true }).selectOption("01");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText("Selected period: January 2025");
+  await page.route("**/api/transparency/export?*", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    await route.fulfill({
+      status: 503,
+      contentType: "text/html",
+      body: "Temporarily unavailable",
+    });
+  });
+  await page
+    .getByRole("button", { name: "Download PowerPoint", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Preparing report…", exact: true }),
+  ).toBeDisabled();
+  await expect(dialog.getByRole("status")).toContainText(
+    "Unable to prepare the report",
+  );
+  await page.unroute("**/api/transparency/export?*");
+  await page.setViewportSize({ width: 320, height: 844 });
+  const downloaded = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Download PowerPoint", exact: true })
+    .click();
+  const file = await downloaded;
+  expect(file.suggestedFilename()).toBe("city-church-both-2025-01-month.pptx");
+  await expect(dialog.getByRole("status")).toContainText(
+    "Your report is ready",
+  );
+  const retry = dialog.getByRole("link", { name: /Save file again/ });
+  await expect(retry).toBeVisible();
+  await expect(retry).toBeInViewport();
+  await page.screenshot({
+    path: "test-results/export-ready-mobile.png",
+    fullPage: true,
+  });
+  const retryDownload = page.waitForEvent("download");
+  await retry.click();
+  expect((await retryDownload).suggestedFilename()).toBe(
+    file.suggestedFilename(),
+  );
+  await page.getByLabel("Export contents").selectOption("year");
+  await expect(page.getByLabel("Export month", { exact: true })).toHaveCount(0);
+  await expect(dialog).toContainText("Selected period: January–December 2025");
+  await page.setViewportSize({ width: 320, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth > innerWidth,
+    ),
+  ).toBe(false);
+  await page.screenshot({
+    path: "test-results/export-feedback-mobile.png",
+    fullPage: true,
+  });
+  await page.getByRole("button", { name: "Close export" }).click();
+  await page.context().clearCookies();
+  await page.goto(
+    "/?month=2026-01&year=2026&export=month&format=pptx&report=both",
+  );
+  await page.getByLabel("Export year", { exact: true }).selectOption("2025");
+  await page.getByLabel("Export month", { exact: true }).selectOption("09");
+  const next = new URL(
+    "http://localhost:3000" +
+      (await page.getByRole("dialog").getByRole("link").getAttribute("href")),
+  ).searchParams.get("next");
+  expect(next).toContain("month=2025-09&year=2025");
+  expect(next).toContain("report=both");
 });
