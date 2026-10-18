@@ -12,6 +12,7 @@
     "db:migrate": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:ledger": "tsx scripts/seed-ledger-2026.ts",
+    "db:seed:giving": "tsx scripts/seed-giving-2026.ts",
     "test:e2e": "playwright test",
     "db:backup": "node scripts/database-backup.mjs",
     "db:backup:verify": "node scripts/database-backup.mjs --verify",

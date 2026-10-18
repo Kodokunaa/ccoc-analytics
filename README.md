@@ -16,6 +16,8 @@ Database backups and restores cover the app's `public` schema. Supabase-managed 
 
 ## Application features
 
+The separate Sunday offerings sheet is imported with `npm run db:seed:giving -- --env-file=.env.production` (preview) and `--apply` (write). Its 19 entries total PHP 54,458 for June through 11 October 2026. June's entries total PHP 9,718; the sheet's PHP 9,724 subtotal differs by PHP 6, documented in the imported notes. This import attaches offerings to existing Sunday services where possible, leaves unknown attendance absent, preserves campaign records, audits additions, and refuses conflicting giving records.
+
 - Responsive dashboard, collapsible mobile navigation, filters, search, tables, pagination, loading and empty states.
 - Email/password authentication with bcrypt, opaque database sessions, HTTP-only cookies, logout and account-level login throttling.
 - Live role checks, inactive account blocking, session revocation on user changes, and origin checks for mutations.
