@@ -1,7 +1,7 @@
 import { currency, growth, series, summary } from "./analytics";
 import { monthName, monthReport } from "./public-analytics";
 import type { TransparencyData } from "./transparency";
-export type PresentationMetric = "attendance" | "giving";
+export type PresentationMetric = "attendance" | "giving" | "both";
 export type ReportSlide = {
   title: string;
   period: string;
@@ -36,9 +36,11 @@ export function presentationSlides(
   const givingRecorded = r.records.some((s) => s.giving.length > 0);
   const givingStats = summary(r.records.filter((s) => s.giving.length > 0));
   const period = monthName(month);
-  const note = `Source: active ${report} records for ${month}. Missing entries are omitted from graphs and per-recorded-service averages, rather than treated as recorded zero.${report === "giving" ? " Giving is in PHP." : ""} Private notes and staff identities are excluded.`;
   const slides: ReportSlide[] = [];
-  for (const metric of [report]) {
+  for (const metric of report === "both"
+    ? (["attendance", "giving"] as const)
+    : [report]) {
+    const note = `Source: active ${metric} records for ${month}. Missing entries are omitted from graphs and per-recorded-service averages, rather than treated as recorded zero.${metric === "giving" ? " Giving is in PHP." : ""} Private notes and staff identities are excluded.`;
     const title = metric === "attendance" ? "Attendance" : "Giving";
     const rows =
       metric === "attendance"

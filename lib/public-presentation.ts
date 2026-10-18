@@ -6,7 +6,7 @@ import {
 import { monthName } from "./public-analytics";
 import type { TransparencyData } from "./transparency";
 
-/** Three editable slides per month for the selected report. */
+/** Three editable slides per metric per month; six when both are selected. */
 export async function publicPresentation(
   data: TransparencyData,
   previousYear: TransparencyData,
@@ -22,7 +22,7 @@ export async function publicPresentation(
   ppt.layout = "LAYOUT_WIDE";
   ppt.author = data.churchName;
   ppt.subject = `Public ${report} report`;
-  ppt.title = `${data.churchName} — ${report === "attendance" ? "Attendance" : "Giving"} — ${scope === "year" ? month.slice(0, 4) : monthName(month)}`;
+  ppt.title = `${data.churchName} — ${report === "both" ? "Attendance & giving" : report === "attendance" ? "Attendance" : "Giving"} — ${scope === "year" ? month.slice(0, 4) : monthName(month)}`;
   ppt.company = data.churchName;
   ppt.theme = {
     headFontFace: "Arial",

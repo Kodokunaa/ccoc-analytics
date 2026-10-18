@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
       .parse(req.nextUrl.searchParams.get("month"));
     const source = await reportSource(month);
     const report = z
-      .enum(["attendance", "giving"])
+      .enum(["attendance", "giving", "both"])
       .parse(req.nextUrl.searchParams.get("report") ?? "attendance");
     return NextResponse.json(
       {

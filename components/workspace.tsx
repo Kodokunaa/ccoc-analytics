@@ -1508,23 +1508,31 @@ export default function Workspace({ section }: { section: string }) {
                       </p>
                     </div>
                     <div>
-                      {(["attendance", "giving"] as const).map((report) => (
-                        <section className="report-export-group" key={report}>
-                          <h3>
-                            {report === "attendance" ? "Attendance" : "Giving"}
-                          </h3>
-                          <Link
-                            className="primary"
-                            href={`/?year=${start.slice(0, 4)}&month=${start.slice(0, 7)}&export=month&format=pptx&report=${report}`}
-                          >
-                            <Download size={16} />
-                            {report === "attendance"
-                              ? "Attendance"
-                              : "Giving"}{" "}
-                            PowerPoint (.pptx)
-                          </Link>
-                        </section>
-                      ))}
+                      {(["attendance", "giving", "both"] as const).map(
+                        (report) => (
+                          <section className="report-export-group" key={report}>
+                            <h3>
+                              {report === "both"
+                                ? "Attendance & giving"
+                                : report === "attendance"
+                                  ? "Attendance"
+                                  : "Giving"}
+                            </h3>
+                            <Link
+                              className="primary"
+                              href={`/?year=${start.slice(0, 4)}&month=${start.slice(0, 7)}&export=month&format=pptx&report=${report}`}
+                            >
+                              <Download size={16} />
+                              {report === "both"
+                                ? "Attendance & giving"
+                                : report === "attendance"
+                                  ? "Attendance"
+                                  : "Giving"}{" "}
+                              PowerPoint (.pptx)
+                            </Link>
+                          </section>
+                        ),
+                      )}
                       <Link
                         className="secondary"
                         href={`/?year=${start.slice(0, 4)}&month=${start.slice(0, 7)}&export=month&format=xlsx`}

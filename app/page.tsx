@@ -57,7 +57,13 @@ export default async function Page({
       googleReady={googleConfigured()}
       initialScope={exportScope ?? "month"}
       initialFormat={q.format === "pptx" ? "pptx" : "xlsx"}
-      initialReport={q.report === "giving" ? "giving" : "attendance"}
+      initialReport={
+        q.report === "both"
+          ? "both"
+          : q.report === "giving"
+            ? "giving"
+            : "attendance"
+      }
       initialExportOpen={!!exportScope}
     />
   );

@@ -58,7 +58,7 @@ export default function Transparency({
   initialScope?: "data" | "month" | "year";
   initialExportOpen?: boolean;
   initialFormat?: "xlsx" | "pptx";
-  initialReport?: "attendance" | "giving";
+  initialReport?: "attendance" | "giving" | "both";
 }) {
   const [data, setData] = useState(initialData),
     [month, setMonth] = useState(initialMonth),
@@ -75,7 +75,7 @@ export default function Transparency({
         : initialScope,
     ),
     [format, setFormat] = useState<"xlsx" | "pptx">(initialFormat),
-    [reportType, setReportType] = useState<"attendance" | "giving">(
+    [reportType, setReportType] = useState<"attendance" | "giving" | "both">(
       initialReport,
     ),
     [search, setSearch] = useState(""),
@@ -795,6 +795,7 @@ export default function Transparency({
                   >
                     <option value="attendance">Attendance</option>
                     <option value="giving">Giving</option>
+                    <option value="both">Both attendance and giving</option>
                   </select>
                 </label>
               )}
@@ -826,7 +827,9 @@ export default function Transparency({
                   </strong>
                   <p>
                     {format === "pptx"
-                      ? `${reportType === "attendance" ? "Attendance" : "Giving"} numbers, graph, and comparisons with last month and last year. Three slides per month.`
+                      ? reportType === "both"
+                        ? "Attendance numbers, graph, and comparisons, followed by giving numbers, graph, and comparisons. Six slides per month, with last-month and last-year comparisons."
+                        : `${reportType === "attendance" ? "Attendance" : "Giving"} numbers, graph, and comparisons with last month and last year. Three slides per month.`
                       : scope === "year"
                         ? "An annual summary plus January–December reports, with previous-month comparisons."
                         : "Includes recorded service data and a summary compared with the previous month."}

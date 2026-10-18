@@ -119,3 +119,67 @@ test("Annual PowerPoint keeps the selected report separate for all twelve months
   for (const path of slides)
     assert.ok(!(await zip.file(path)!.async("string")).includes("Attendance"));
 });
+test("Combined monthly PowerPoint retains six separate metric slides and editable charts", async () => {
+  const model = presentationSlides(data, data, "2026-01", "both");
+  assert.deepEqual(model, [
+    ...presentationSlides(data, data, "2026-01", "attendance"),
+    ...presentationSlides(data, data, "2026-01", "giving"),
+  ]);
+  const zip = await JSZip.loadAsync(
+    await publicPresentation(data, data, "month", "2026-01", {}, "both"),
+  );
+  assert.equal(
+    Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+      .length,
+    6,
+  );
+  assert.equal(
+    Object.keys(zip.files).filter((n) => /^ppt\/charts\/chart\d+\.xml$/.test(n))
+      .length,
+    2,
+  );
+  for (const [index, slide] of model.entries()) {
+    const xml = await zip
+      .file(`ppt/slides/slide${index + 1}.xml`)!
+      .async("string");
+    assert.ok(xml.includes(slide.title));
+    assert.ok(!xml.includes(index < 3 ? "Giving" : "Attendance"));
+    if (slide.rows) assert.ok(xml.includes("<a:tbl>"));
+  }
+});
+test("Combined annual PowerPoint has 72 slides and uses approved monthly sources for both metrics", async () => {
+  const approved = { ...data, records: [record("2026-01-04", 37, 123.45)] };
+  const zip = await JSZip.loadAsync(
+    await publicPresentation(
+      data,
+      data,
+      "year",
+      "2026-01",
+      { "2026-01": { data: approved, previousYear: data } },
+      "both",
+    ),
+  );
+  assert.equal(
+    Object.keys(zip.files).filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
+      .length,
+    72,
+  );
+  assert.ok(
+    (await zip.file("ppt/slides/slide1.xml")!.async("string")).includes("37"),
+  );
+  assert.ok(
+    (await zip.file("ppt/slides/slide4.xml")!.async("string")).includes(
+      "123.45",
+    ),
+  );
+  assert.ok(
+    (await zip.file("ppt/slides/slide7.xml")!.async("string")).includes(
+      "February 2026",
+    ),
+  );
+  assert.ok(
+    (await zip.file("ppt/slides/slide10.xml")!.async("string")).includes(
+      "Giving numbers",
+    ),
+  );
+});

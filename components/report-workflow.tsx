@@ -164,7 +164,7 @@ export default function ReportWorkflow({
                     Approve and lock month
                   </button>
                 ))}
-              {(["attendance", "giving"] as const).map((report) => (
+              {(["attendance", "giving", "both"] as const).map((report) => (
                 <button
                   key={report}
                   className="secondary"
@@ -189,7 +189,8 @@ export default function ReportWorkflow({
                     }
                   }}
                 >
-                  Preview {report} PowerPoint
+                  Preview {report === "both" ? "attendance and giving" : report}{" "}
+                  PowerPoint
                 </button>
               ))}
             </div>
@@ -203,7 +204,11 @@ export default function ReportWorkflow({
         >
           <div className="operation-actions">
             <h2>
-              {preview.report === "attendance" ? "Attendance" : "Giving"}{" "}
+              {preview.report === "both"
+                ? "Attendance & giving"
+                : preview.report === "attendance"
+                  ? "Attendance"
+                  : "Giving"}{" "}
               PowerPoint preview
             </h2>
             <button className="secondary" onClick={() => setPreview(null)}>

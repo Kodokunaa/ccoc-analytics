@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       .extend({
         scope: z.enum(["data", "month", "year"]),
         format: z.enum(["xlsx", "pptx"]).default("xlsx"),
-        report: z.enum(["attendance", "giving"]).default("attendance"),
+        report: z.enum(["attendance", "giving", "both"]).default("attendance"),
         month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
       })
       .refine(

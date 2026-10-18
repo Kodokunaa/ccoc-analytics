@@ -30,6 +30,7 @@ The separate Sunday offerings sheet is imported with `npm run db:seed:giving -- 
 - Giving is recorded as amounts and optional private notes; category fields, filters, management, and category charts are removed. Existing amounts are preserved by migration.
 - Sunday-service-only workflow: service-type selectors and filters are removed; new records default to Sunday service.
 - Direct Monthly PowerPoint export from the public page, each monthly report row, and staff Reports. Select a month to export its three-slide attendance or giving report; Google sign-in is required.
+- PowerPoint report type also offers Both attendance and giving: six slides per month (attendance numbers, graph, comparisons; then giving numbers, graph, comparisons), or 72 slides for all twelve months. Individual three-slide reports remain available. Capital campaign is excluded.
 - Separate Attendance analytics and Giving analytics pages with weekly/monthly trends, previous month/year and custom comparisons. Attendance includes member/visitor and adult/child breakdowns.
 - One active service per Sunday, enforced by the database. Monthly completeness checks distinguish missing attendance/giving from explicitly recorded zero.
 - Staff Reports supports administrator approval and locking, reopening for corrections, separate three-slide attendance and giving PowerPoint content previews, saved XLSX/PPTX/PDF export copies with checksums, and administrator restoration of archived services.
