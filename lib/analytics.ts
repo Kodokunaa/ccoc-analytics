@@ -32,27 +32,48 @@ export function summary(records: RecordData[]) {
   const attendance = records.flatMap((r) =>
     r.attendance ? [r.attendance.totalAttendance] : [],
   );
-  const giving = records.map((r) => givingTotal(r.giving));
+  const attendanceRecords = records.filter((r) => r.attendance !== null),
+    givingRecords = records.filter((r) => r.giving.length > 0),
+    giving = givingRecords.map((r) => givingTotal(r.giving));
   const totalAttendance = attendance.reduce((a, b) => a + b, 0),
     totalGiving =
       giving.reduce((cents, value) => cents + Math.round(value * 100), 0) / 100;
-  const weeks = new Set(
-    records.map((r) => {
-      const d = new Date(r.serviceDate);
-      const day = d.getUTCDay();
-      d.setUTCDate(d.getUTCDate() - ((day + 6) % 7));
-      return d.toISOString().slice(0, 10);
-    }),
-  ).size;
+  const weeks = (rows: RecordData[]) =>
+    new Set(
+      rows.map((r) => {
+        const d = new Date(r.serviceDate);
+        const day = d.getUTCDay();
+        d.setUTCDate(d.getUTCDate() - ((day + 6) % 7));
+        return d.toISOString().slice(0, 10);
+      }),
+    ).size;
+  const attendanceWeeks = weeks(attendanceRecords),
+    givingWeeks = weeks(givingRecords);
+  const paired = records.filter(
+      (r) => r.attendance !== null && r.giving.length > 0,
+    ),
+    pairedAttendance = paired.reduce(
+      (total, r) => total + r.attendance!.totalAttendance,
+      0,
+    ),
+    pairedGiving =
+      paired.reduce(
+        (cents, r) => cents + Math.round(givingTotal(r.giving) * 100),
+        0,
+      ) / 100;
   return {
     totalAttendance,
     totalGiving,
     averageAttendance: attendance.length
       ? totalAttendance / attendance.length
       : 0,
-    averageGiving: records.length ? totalGiving / records.length : 0,
-    averageWeeklyAttendance: weeks ? totalAttendance / weeks : 0,
-    averageWeeklyGiving: weeks ? totalGiving / weeks : 0,
+    averageGiving: givingRecords.length
+      ? totalGiving / givingRecords.length
+      : 0,
+    averageWeeklyAttendance: attendanceWeeks
+      ? totalAttendance / attendanceWeeks
+      : 0,
+    averageWeeklyGiving: givingWeeks ? totalGiving / givingWeeks : 0,
     peakAttendance: attendance.reduce((a, b) => Math.max(a, b), 0),
     lowestAttendance: attendance.length
       ? attendance.reduce((a, b) => Math.min(a, b), Infinity)
@@ -61,7 +82,8 @@ export function summary(records: RecordData[]) {
     lowestGiving: giving.length
       ? giving.reduce((a, b) => Math.min(a, b), Infinity)
       : 0,
-    givingPerAttendee: totalAttendance ? totalGiving / totalAttendance : 0,
+    givingPerAttendee: pairedAttendance ? pairedGiving / pairedAttendance : 0,
+    givingPerAttendeeAvailable: pairedAttendance > 0,
   };
 }
 export function series(

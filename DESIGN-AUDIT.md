@@ -55,3 +55,33 @@ The earlier contrast scan remains a separate result. This live audit checks resp
 Attendance and giving now have independent analytics navigation entries, dashboard charts, monthly PowerPoint links and three-slide previews. PowerPoint selection survives Google sign-in and is validated by the export endpoint. Filenames identify the selected report. Monthly decks contain numbers, a native chart, and last-month/last-year comparisons; annual decks contain 36 slides for one selected report. Existing combined export archives are preserved.
 
 Validation: 26 unit tests and all 11 browser tests passed against an isolated production build and temporary database over HTTPS. Additional checks exercised both selected downloads, preview isolation, invalid report rejection, Google authorization and responsive layouts at 1440px, 390px and 320px. PowerPoint rendered both sample decks, and all six slides were inspected. Arial avoids an unintended fallback for machines without Poppins. Corrected the narrow export-dialog frame and wrapped preview tables so their values remain visible on phones.
+
+## Full application and export audit — 18 October 2026
+
+Fixed findings:
+
+- High priority: production public-schema tables had no RLS and granted direct access to Supabase `anon` and `authenticated`. The reproducible security migration enables default-deny RLS on 19 tables (including migration metadata), revokes direct client grants, and removes default client table grants. The server connection was confirmed to use a role with BYPASSRLS. This follows [Supabase's RLS and grant guidance](https://supabase.com/docs/guides/database/postgres/row-level-security). Exposure depended on whether the Data API was enabled; this audit does not establish that data was accessed.
+- Missing attendance/giving previously entered weekly denominators, and missing offerings could lower the minimum giving to zero. Averages and minima now use records for the selected metric. Explicit zeros remain valid recorded data.
+- Giving per attendee now uses services with both measurements, preventing unrelated Sundays from being combined. Unavailable ratios are labeled explicitly.
+- Public overview, service/month tables, staff dashboard, and workbooks distinguish missing data from recorded zero. Attendance analytics omit giving-only services, and attendance breakdowns include unclassified people rather than silently dropping them.
+- PowerPoint rejects the raw-data scope at the API boundary. Attendance slide counts identify services with attendance rather than all services.
+- XLSX exports retain integer count formatting and two-decimal money formatting, preserve missing values and approved snapshots, and keep campaign amounts outside Sunday giving.
+- Staff PDF identifies comparison dates, uses readable grouped charts for long ranges, avoids overlapping value labels, and consistently displays monetary decimals.
+
+Validation:
+
+- 35 unit tests, 11 browser tests, lint, type checking, and a production build passed. Browser tests ran on a temporary local database over HTTPS, covering staff roles, session revocation, reset tokens, OAuth state/PKCE, rate limits, approvals/locks, imports, and archives.
+- Export matrix passed for raw/monthly/yearly XLSX, separate attendance/giving monthly and yearly PPTX, staff XLSX/PDF, archive byte restoration and corrupt-checksum rejection, invalid options, Google/staff download gates, and exclusion of private notes and campaign funds. Monthly PPTX has 3 slides; annual has 36. Native editable tables/charts were verified.
+- Export samples were opened in native Excel and PowerPoint. Monthly slides, workbook summary rendering and both PDF pages were visually reviewed, including a 52-Sunday PDF range.
+- All four public views, both export-dialog formats, and eleven admin sections passed overflow/navigation checks at 1440px, 390px and 320px. Synthetic incomplete data covered explicit zero and missing measurements.
+- Production dependencies: npm audit reported no known vulnerabilities. This is a dependency scan, not a penetration-test certification.
+- A production backup was created and restored into a temporary local verification database before the security migration. Production church records were not edited by audit fixtures.
+
+Remaining limits and follow-ups:
+
+- Capital campaign is viewable in public and staff sections but has no dedicated XLSX/PPTX export or editing form yet.
+- Ledger discrepancies remain unresolved: campaign PHP 50 and June giving PHP 6. Figures were not changed to force agreement with handwritten subtotals.
+- Real Google account consent/token exchange and actual Resend delivery were not exercised. Tests cover protocol protections, stored viewer sessions, and reset-token lifecycle. No email or live Manus request was sent.
+- Vercel SSO protection is still configured for all deployments, including production, so ordinary guests may be stopped before reaching the app. Its policy was not relaxed during this audit.
+- The Resend key previously pasted into chat should be rotated through Resend and replaced in the environment. The audit did not revoke active credentials.
+- Automated backup configuration still points at the local `.env` database; the production backup above was explicitly selected. A recurring Supabase production-backup policy needs separate configuration.

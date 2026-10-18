@@ -1,4 +1,7 @@
 /* Teal is the interface accent. Orange is reserved for analytics; the logo retains its original color. */
+.kpi > strong {
+  overflow-wrap: anywhere;
+}
 .dashboard-charts.single-chart {
   grid-template-columns: minmax(0, 1fr);
 }

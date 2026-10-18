@@ -299,9 +299,13 @@ export default function Workspace({ section }: { section: string }) {
       ? growth(stats.totalGiving, prior.totalGiving)
       : null;
   const compareSeries = (monthlyMode = false) => {
+    const recorded = (s: RecordData) =>
+      section.endsWith("attendance")
+        ? s.attendance !== null
+        : s.giving.length > 0;
     return comparisonSeries(
-      filtered,
-      previous,
+      filtered.filter(recorded),
+      previous.filter(recorded),
       start,
       comparisonWindow(start, end, comparison, customStart, customEnd).start,
       monthlyMode ? "monthly" : "weekly",
@@ -642,6 +646,21 @@ export default function Workspace({ section }: { section: string }) {
               ] as const))
             sums.set(name, (sums.get(name) ?? 0) + a[key]);
       }
+    }
+    if (kind === "members" || kind === "ages") {
+      const unclassified = filtered.reduce((sum, s) => {
+        const a = s.attendance;
+        return (
+          sum +
+          (a
+            ? a.totalAttendance -
+              (kind === "members"
+                ? a.memberCount + a.visitorCount
+                : a.adultCount + a.childrenCount)
+            : 0)
+        );
+      }, 0);
+      if (unclassified > 0) sums.set("Unclassified", unclassified);
     }
     return [...sums].map(([name, value]) => ({ name, value }));
   };
@@ -1021,21 +1040,27 @@ export default function Workspace({ section }: { section: string }) {
                   <div className="kpi-grid">
                     {kpi(
                       "Total attendance",
-                      stats.totalAttendance.toLocaleString(),
+                      filtered.some((r) => r.attendance !== null)
+                        ? stats.totalAttendance.toLocaleString()
+                        : "Not recorded",
                       attendanceGrowth,
                       <Users size={19} />,
                       "vs. comparison",
                     )}
                     {kpi(
                       "Total giving",
-                      currency(stats.totalGiving),
+                      filtered.some((r) => r.giving.length > 0)
+                        ? currency(stats.totalGiving)
+                        : "Not recorded",
                       givingGrowth,
                       <Wallet size={19} />,
                       "vs. comparison",
                     )}
                     {kpi(
                       "Avg. weekly attendance",
-                      stats.averageWeeklyAttendance.toFixed(2),
+                      filtered.some((r) => r.attendance !== null)
+                        ? stats.averageWeeklyAttendance.toFixed(2)
+                        : "Not recorded",
                       hasAttendanceComparison
                         ? growth(
                             stats.averageWeeklyAttendance,
@@ -1047,10 +1072,11 @@ export default function Workspace({ section }: { section: string }) {
                     )}
                     {kpi(
                       "Giving per attendee",
-                      currency(stats.givingPerAttendee),
-                      hasGivingComparison &&
-                        stats.totalAttendance > 0 &&
-                        prior.totalAttendance > 0
+                      stats.givingPerAttendeeAvailable
+                        ? currency(stats.givingPerAttendee)
+                        : "Not available",
+                      stats.givingPerAttendeeAvailable &&
+                        prior.givingPerAttendeeAvailable
                         ? growth(
                             stats.givingPerAttendee,
                             prior.givingPerAttendee,

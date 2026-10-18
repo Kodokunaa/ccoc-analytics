@@ -22,6 +22,10 @@ export async function GET(req: NextRequest) {
         (q) => q.month.startsWith(String(q.year)),
         "Month must match year",
       )
+      .refine(
+        (q) => q.format !== "pptx" || q.scope !== "data",
+        "PowerPoint requires a monthly or yearly report",
+      )
       .parse(Object.fromEntries(req.nextUrl.searchParams));
     if (!(await reserveExport(viewer.id)))
       return NextResponse.json(

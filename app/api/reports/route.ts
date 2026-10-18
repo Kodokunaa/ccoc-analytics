@@ -105,6 +105,18 @@ export async function GET(req: NextRequest) {
       ["Giving per attendee (PHP)", stats.givingPerAttendee],
     ];
     let buffer: Buffer;
+    const hasAttendance = rows.some((r) => r.attendance !== null),
+      hasGiving = rows.some((r) => r.giving.length > 0);
+    for (const metric of metrics) {
+      if (metric[0].includes("growth")) continue;
+      if (metric[0] === "Giving per attendee (PHP)") {
+        if (!stats.givingPerAttendeeAvailable) metric[1] = "Not available";
+      } else if (
+        (!hasAttendance && metric[0].toLowerCase().includes("attendance")) ||
+        (!hasGiving && metric[0].toLowerCase().includes("giving"))
+      )
+        metric[1] = "Not recorded";
+    }
     if (q.format === "excel") {
       const { default: ExcelJS } = await import("exceljs");
       const book = new ExcelJS.Workbook();
@@ -117,6 +129,7 @@ export async function GET(req: NextRequest) {
         "Generated (Asia/Manila)",
         new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila" }),
       ]);
+      s.addRow(["Compared with", `${window.start} to ${window.end}`]);
       s.addRow(["Metric", "Value"]);
       metrics.forEach((m) => s.addRow(m));
       s.columns = [{ width: 42 }, { width: 25 }];
@@ -155,7 +168,7 @@ export async function GET(req: NextRequest) {
         sheet.autoFilter = { from: "A1", to: sheet === att ? "G1" : "C1" };
       }
       for (const sheet of book.worksheets) {
-        const row = sheet.getRow(sheet === s ? 4 : 1);
+        const row = sheet.getRow(sheet === s ? 5 : 1);
         row.font = { bold: true, color: { argb: "FFFFFFFF" } };
         row.fill = {
           type: "pattern",
@@ -165,7 +178,17 @@ export async function GET(req: NextRequest) {
         sheet.eachRow((row, i) => {
           if (i > 1)
             row.eachCell((c) => {
-              if (typeof c.value === "number") c.numFmt = "#,##0.00";
+              if (typeof c.value === "number") {
+                const label = String(row.getCell(1).value ?? "").toLowerCase();
+                c.numFmt =
+                  sheet === giving ||
+                  (sheet === s &&
+                    (label.includes("giving") ||
+                      label.includes("average") ||
+                      label.includes("growth")))
+                    ? "#,##0.00"
+                    : "#,##0";
+              }
             });
         });
       }
@@ -195,7 +218,8 @@ export async function GET(req: NextRequest) {
         .moveDown(0.5)
         .fontSize(10)
         .fillColor("#000000")
-        .text(`Period: ${q.start} – ${q.end}`)
+        .text(`Period: ${q.start} - ${q.end}`)
+        .text(`Compared with: ${window.start} - ${window.end}`)
         .text(
           `Generated: ${new Date().toLocaleString("en-PH", { timeZone: "Asia/Manila" })} (Asia/Manila)`,
         );
@@ -205,28 +229,42 @@ export async function GET(req: NextRequest) {
           .fillColor("#000000")
           .fontSize(10)
           .text(name, { continued: true, width: 400 });
-        pdf
-          .fillColor("#000000")
-          .text(
-            typeof value === "number"
-              ? value.toLocaleString("en-PH", { maximumFractionDigits: 2 })
-              : value,
-            { align: "right" },
-          );
+        pdf.fillColor("#000000").text(
+          typeof value === "number"
+            ? value.toLocaleString("en-PH", {
+                minimumFractionDigits: name.includes("PHP") ? 2 : 0,
+                maximumFractionDigits: 2,
+              })
+            : value,
+          { align: "right" },
+        );
         pdf.moveDown(0.3);
       }
       pdf.addPage();
       pdf
         .fillColor("#000000")
         .fontSize(17)
-        .text("Weekly attendance and giving");
-      const points = series(rows);
+        .text("Attendance and giving trends");
       const chart = (
         key: "attendance" | "giving",
         title: string,
         top: number,
       ) => {
-        pdf.fontSize(12).fillColor("#000000").text(title, 45, top);
+        const recorded = rows.filter((r) =>
+          key === "attendance" ? r.attendance !== null : r.giving.length > 0,
+        );
+        let grouping = q.period.toLowerCase() as
+          "weekly" | "monthly" | "quarterly" | "yearly";
+        let points = series(recorded, grouping);
+        for (const candidate of ["monthly", "quarterly", "yearly"] as const) {
+          if (points.length <= 12) break;
+          grouping = candidate;
+          points = series(recorded, grouping);
+        }
+        pdf
+          .fontSize(12)
+          .fillColor("#000000")
+          .text(`${title} - ${grouping} totals`, 45, top);
         const bottom = top + 175,
           left = 55,
           width = 475,
@@ -253,19 +291,30 @@ export async function GET(req: NextRequest) {
           pdf
             .fontSize(8)
             .fillColor("#000000")
-            .text(p.name.slice(5), left + i * step, bottom + 8, {
-              width: step,
-              align: "center",
-            });
-          pdf.text(
+            .text(
+              grouping === "weekly" ? p.name.slice(5) : p.name,
+              left + i * step,
+              bottom + 8,
+              {
+                width: step,
+                align: "center",
+              },
+            );
+          const valueLabel =
             key === "giving"
-              ? `PHP ${p[key].toLocaleString("en-PH", {
+              ? p[key].toLocaleString("en-PH", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                })}`
-              : String(p[key]),
+                })
+              : String(p[key]);
+          const labelHeight = pdf.heightOfString(valueLabel, {
+            width: step,
+            align: "center",
+          });
+          pdf.text(
+            valueLabel,
             left + i * step,
-            bottom - barHeight - 14,
+            bottom - barHeight - labelHeight - 4,
             { width: step, align: "center" },
           );
         }
@@ -280,7 +329,7 @@ export async function GET(req: NextRequest) {
           .fontSize(8)
           .fillColor("#000000")
           .text(
-            `${church} · Confidential leadership report · ${i + 1} / ${range.count}`,
+            `${church} | Confidential leadership report | ${i + 1} / ${range.count}`,
             45,
             780,
             { lineBreak: false },

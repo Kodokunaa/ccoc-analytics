@@ -82,6 +82,27 @@ test("Missing attendance differs from recorded zero", () => {
   data[0].attendance = null;
   assert.equal(summary(data).averageAttendance, 20);
   assert.equal(summary(data).lowestAttendance, 20);
+  assert.equal(summary(data).averageWeeklyAttendance, 20);
+});
+test("Missing giving does not lower per-service/weekly averages or become a minimum", () => {
+  const data = sample(2026, [10, 20], [100, 200]);
+  data[0].giving = [];
+  assert.equal(summary(data).averageGiving, 200);
+  assert.equal(summary(data).averageWeeklyGiving, 200);
+  assert.equal(summary(data).lowestGiving, 200);
+  data[0].giving = [{ amount: 0 }];
+  assert.equal(summary(data).averageGiving, 100);
+  assert.equal(summary(data).averageWeeklyGiving, 100);
+  assert.equal(summary(data).lowestGiving, 0);
+});
+test("giving per attendee uses only services with both metrics", () => {
+  const data = sample(2026, [10, 20, 30], [100, 200, 900]);
+  data[0].attendance = null;
+  data[2].giving = [];
+  assert.equal(summary(data).givingPerAttendee, 10);
+  assert.equal(summary(data).givingPerAttendeeAvailable, true);
+  data[1].attendance = null;
+  assert.equal(summary(data).givingPerAttendeeAvailable, false);
 });
 test("Invalid breakdowns and calendar dates are rejected", () => {
   assert.equal(

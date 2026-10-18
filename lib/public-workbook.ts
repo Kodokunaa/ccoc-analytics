@@ -10,7 +10,16 @@ function header(sheet: ExcelJS.Worksheet, row: number) {
 function reportRows(report: ReturnType<typeof monthReport>) {
   const s = report.stats,
     p = report.previousStats;
-  return [
+  const recorded = (records: RecordData[], metric: "attendance" | "giving") =>
+    records.some((r) =>
+      metric === "attendance" ? r.attendance !== null : r.giving.length > 0,
+    );
+  const value = (
+    number: number,
+    records: RecordData[],
+    metric: "attendance" | "giving",
+  ) => (recorded(records, metric) ? number : "Not recorded");
+  const rows: (string | number)[][] = [
     ["Services recorded", report.services, report.previousServices],
     ["Total attendance", s.totalAttendance, p.totalAttendance],
     [
@@ -45,6 +54,30 @@ function reportRows(report: ReturnType<typeof monthReport>) {
         : "No services recorded",
     ],
   ];
+  for (const row of rows) {
+    const label = String(row[0]);
+    if (
+      label.includes("growth") ||
+      label === "Services recorded" ||
+      label === "Data status"
+    )
+      continue;
+    if (label === "Giving per attendee (PHP)") {
+      for (const [index, records] of [
+        [1, report.records],
+        [2, report.previousRecords],
+      ] as const)
+        if (!summary(records).givingPerAttendeeAvailable)
+          row[index] = "Not available";
+    } else {
+      const metric = label.toLowerCase().includes("giving")
+        ? "giving"
+        : "attendance";
+      row[1] = value(Number(row[1]), report.records, metric);
+      row[2] = value(Number(row[2]), report.previousRecords, metric);
+    }
+  }
+  return rows;
 }
 function monthlySheet(
   book: ExcelJS.Workbook,
@@ -77,7 +110,12 @@ function monthlySheet(
       s.serviceDate.slice(0, 10),
       s.serviceName,
       s.attendance?.totalAttendance ?? "Not recorded",
-      s.giving.reduce((sum, g) => sum + Number(g.amount), 0),
+      s.giving.length
+        ? s.giving.reduce(
+            (cents, g) => cents + Math.round(Number(g.amount) * 100),
+            0,
+          ) / 100
+        : "Not recorded",
     ]),
   );
   if (!r.records.length) sheet.addRow(["No services recorded in this month"]);
@@ -164,9 +202,24 @@ export async function publicWorkbook(
       sheet.addRow([
         r.title,
         r.services,
-        r.stats.totalAttendance,
-        r.stats.totalGiving,
-        r.previousStats.totalAttendance,
+        monthReport(
+          (sources[r.month]?.data ?? data).records,
+          r.month,
+        ).records.some((s) => s.attendance !== null)
+          ? r.stats.totalAttendance
+          : "Not recorded",
+        monthReport(
+          (sources[r.month]?.data ?? data).records,
+          r.month,
+        ).records.some((s) => s.giving.length > 0)
+          ? r.stats.totalGiving
+          : "Not recorded",
+        monthReport(
+          (sources[r.month]?.data ?? data).records,
+          r.month,
+        ).previousRecords.some((s) => s.attendance !== null)
+          ? r.previousStats.totalAttendance
+          : "Not recorded",
         r.attendanceGrowth ?? "No baseline",
         r.givingGrowth ?? "No baseline",
       ]);
@@ -200,7 +253,25 @@ export async function publicWorkbook(
   for (const sheet of book.worksheets)
     sheet.eachRow((row) =>
       row.eachCell((cell) => {
-        if (typeof cell.value === "number") cell.numFmt = "#,##0.00";
+        if (typeof cell.value === "number") {
+          const label = String(row.getCell(1).value ?? "").toLowerCase();
+          const annual = sheet.name === "Annual summary";
+          const raw = /^\d{4}-\d{2}-\d{2}$/.test(label);
+          const money =
+            sheet.name === "Giving" ||
+            (sheet.name !== "Attendance" &&
+              (annual
+                ? Number(cell.col) === 4
+                : raw
+                  ? Number(cell.col) === 4
+                  : label.includes("giving")));
+          const decimal =
+            money ||
+            label.includes("average") ||
+            label.includes("growth") ||
+            (annual && Number(cell.col) >= 6);
+          cell.numFmt = decimal ? "#,##0.00" : "#,##0";
+        }
         cell.alignment = { vertical: "middle", wrapText: true };
       }),
     );

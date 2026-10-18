@@ -17,6 +17,10 @@ Database backups and restores cover the app's `public` schema. Supabase-managed 
 
 ## Application features
 
+Database tables are server-only: migrations enable default-deny row-level security, revoke client grants, and remove default grants for Supabase `anon` and `authenticated` roles. The application's server connection must own these tables or have `BYPASSRLS`; never expose that connection to a browser. Staff and Google viewer permissions remain enforced by the Next.js APIs.
+
+Analytics omit missing metric records from per-service and weekly averages. Giving per attendee uses only services with both attendance and giving, and unavailable metrics are labeled explicitly in the UI and exports. Campaign funds remain separate. PDF charts group long periods into readable totals; reports identify their comparison dates.
+
 The separate Sunday offerings sheet is imported with `npm run db:seed:giving -- --env-file=.env.production` (preview) and `--apply` (write). Its 19 entries total PHP 54,458 for June through 11 October 2026. June's entries total PHP 9,718; the sheet's PHP 9,724 subtotal differs by PHP 6, documented in the imported notes. This import attaches offerings to existing Sunday services where possible, leaves unknown attendance absent, preserves campaign records, audits additions, and refuses conflicting giving records.
 
 - Responsive dashboard, collapsible mobile navigation, filters, search, tables, pagination, loading and empty states.

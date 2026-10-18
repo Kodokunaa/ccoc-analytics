@@ -64,7 +64,10 @@ export function presentationSlides(
               "Lowest attendance",
               recorded ? num(r.stats.lowestAttendance) : "Not recorded",
             ],
-            ["Services recorded", String(r.services)],
+            [
+              "Services with attendance",
+              String(r.records.filter((s) => s.attendance !== null).length),
+            ],
           ]
         : [
             ["Metric", "Value (PHP)"],

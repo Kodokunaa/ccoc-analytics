@@ -227,9 +227,11 @@ export default function Transparency({
                 <td>{date(s.serviceDate)}</td>
                 <td>{s.attendance?.totalAttendance ?? "Not recorded"}</td>
                 <td>
-                  {currency(
-                    s.giving.reduce((sum, g) => sum + Number(g.amount), 0),
-                  )}
+                  {s.giving.length
+                    ? currency(
+                        s.giving.reduce((sum, g) => sum + Number(g.amount), 0),
+                      )
+                    : "Not recorded"}
                 </td>
               </tr>
             ))}
@@ -464,19 +466,25 @@ export default function Transparency({
                 <div className="kpi-grid">
                   {metric(
                     "Total attendance",
-                    stats.totalAttendance.toLocaleString(),
+                    report.records.some((r) => r.attendance !== null)
+                      ? stats.totalAttendance.toLocaleString()
+                      : "Not recorded",
                     report.attendanceGrowth,
                     Users,
                   )}
                   {metric(
                     "Total giving",
-                    currency(stats.totalGiving),
+                    report.records.some((r) => r.giving.length > 0)
+                      ? currency(stats.totalGiving)
+                      : "Not recorded",
                     report.givingGrowth,
                     Wallet,
                   )}
                   {metric(
                     "Average weekly attendance",
-                    stats.averageWeeklyAttendance.toFixed(2),
+                    report.records.some((r) => r.attendance !== null)
+                      ? stats.averageWeeklyAttendance.toFixed(2)
+                      : "Not recorded",
                     report.records.some((r) => r.attendance !== null) &&
                       report.previousRecords.some((r) => r.attendance !== null)
                       ? growth(
@@ -488,11 +496,11 @@ export default function Transparency({
                   )}
                   {metric(
                     "Giving per attendee",
-                    currency(stats.givingPerAttendee),
-                    stats.totalAttendance > 0 &&
-                      report.previousStats.totalAttendance > 0 &&
-                      report.records.some((r) => r.giving.length > 0) &&
-                      report.previousRecords.some((r) => r.giving.length > 0)
+                    stats.givingPerAttendeeAvailable
+                      ? currency(stats.givingPerAttendee)
+                      : "Not available",
+                    stats.givingPerAttendeeAvailable &&
+                      report.previousStats.givingPerAttendeeAvailable
                       ? growth(
                           stats.givingPerAttendee,
                           report.previousStats.givingPerAttendee,
@@ -569,21 +577,33 @@ export default function Transparency({
                         <tr>
                           <td>Total attendance</td>
                           <td>
-                            {report.previousServices
+                            {report.previousRecords.some(
+                              (s) => s.attendance !== null,
+                            )
                               ? report.previousStats.totalAttendance.toLocaleString()
                               : "No records"}
                           </td>
-                          <td>{stats.totalAttendance.toLocaleString()}</td>
+                          <td>
+                            {report.records.some((s) => s.attendance !== null)
+                              ? stats.totalAttendance.toLocaleString()
+                              : "Not recorded"}
+                          </td>
                           <td>{percent(report.attendanceGrowth)}</td>
                         </tr>
                         <tr>
                           <td>Total giving</td>
                           <td>
-                            {report.previousServices
+                            {report.previousRecords.some(
+                              (s) => s.giving.length > 0,
+                            )
                               ? currency(report.previousStats.totalGiving)
                               : "No records"}
                           </td>
-                          <td>{currency(stats.totalGiving)}</td>
+                          <td>
+                            {report.records.some((s) => s.giving.length > 0)
+                              ? currency(stats.totalGiving)
+                              : "Not recorded"}
+                          </td>
                           <td>{percent(report.givingGrowth)}</td>
                         </tr>
                         <tr>
@@ -649,8 +669,24 @@ export default function Transparency({
                               )}
                             </td>
                             <td>{r.services}</td>
-                            <td>{r.stats.totalAttendance.toLocaleString()}</td>
-                            <td>{currency(r.stats.totalGiving)}</td>
+                            <td>
+                              {data.records.some(
+                                (s) =>
+                                  s.serviceDate.startsWith(r.month) &&
+                                  s.attendance !== null,
+                              )
+                                ? r.stats.totalAttendance.toLocaleString()
+                                : "Not recorded"}
+                            </td>
+                            <td>
+                              {data.records.some(
+                                (s) =>
+                                  s.serviceDate.startsWith(r.month) &&
+                                  s.giving.length > 0,
+                              )
+                                ? currency(r.stats.totalGiving)
+                                : "Not recorded"}
+                            </td>
                             <td>{percent(r.attendanceGrowth)}</td>
                             <td>{percent(r.givingGrowth)}</td>
                           </tr>
