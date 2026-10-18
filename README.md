@@ -4,7 +4,7 @@ A full-stack application for service records, attendance, Philippine Peso giving
 
 ## Features
 
-- Separate public Capital campaign view with monthly faith pledge entries and prior-year savings. These amounts never contribute to Sunday giving totals or exports.
+- Separate public Capital campaign view for church lot pledges, with monthly faith pledge entries and prior-year savings. These amounts never contribute to Sunday giving totals or exports.
 - Public overview and staff dashboard show a Capital campaign panel beside Giving, with monthly pledges and the balance through the selected month. Staff can open Capital campaign directly after Giving in the sidebar to review yearly records and prior-year balances.
 
 ## Importing the supplied 2026 ledger

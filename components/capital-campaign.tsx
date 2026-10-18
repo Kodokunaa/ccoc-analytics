@@ -27,8 +27,8 @@ export default function CapitalCampaign({
         <h2 id="campaign-title">Capital campaign · {year}</h2>
       </div>
       <p className="public-data-note">
-        Faith pledge records, tracked separately from Sunday giving. Amounts are
-        transcribed from the supplied ledger.
+        Pledges for the church lot, tracked separately from Sunday giving.
+        Amounts are transcribed from the supplied ledger.
       </p>
       <div className="kpi-grid">
         {[

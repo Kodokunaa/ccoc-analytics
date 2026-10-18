@@ -18,7 +18,7 @@ export default function CampaignSummary({
       <div className="panel-heading">
         <div>
           <h2>Capital campaign</h2>
-          <p>Faith pledges · {monthName(month)}</p>
+          <p>Church lot pledges · {monthName(month)}</p>
         </div>
       </div>
       <div className="campaign-summary-values">
