@@ -25,6 +25,7 @@ import { TrendChart } from "./lazy-charts";
 import GoogleMark from "./google-mark";
 import ChurchLogo from "./church-logo";
 import CapitalCampaign from "./capital-campaign";
+import CampaignSummary from "./campaign-summary";
 import type { TransparencyData } from "@/lib/transparency";
 import { monthReport, monthName } from "@/lib/public-analytics";
 import { currency, series, growth } from "@/lib/analytics";
@@ -500,7 +501,7 @@ export default function Transparency({
                     HeartHandshake,
                   )}
                 </div>
-                <div className="dashboard-charts separate-trends">
+                <div className="dashboard-charts separate-trends with-campaign">
                   <section className="panel">
                     <div className="panel-heading">
                       <div>
@@ -537,6 +538,11 @@ export default function Transparency({
                       Giving in Philippine Peso (PHP)
                     </div>
                   </section>
+                  <CampaignSummary
+                    entries={data.campaign}
+                    month={month}
+                    onView={() => setTab("campaign")}
+                  />
                 </div>
                 <details className="panel public-comparison disclosure-panel">
                   <summary>Compare with last month</summary>

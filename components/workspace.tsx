@@ -30,6 +30,9 @@ import {
 } from "lucide-react";
 import { TrendChart, Breakdown } from "./lazy-charts";
 import ChurchLogo from "./church-logo";
+import CapitalCampaign from "./capital-campaign";
+import CampaignSummary from "./campaign-summary";
+import type { CampaignEntry } from "@/lib/campaign";
 import ReportWorkflow from "./report-workflow";
 import ServiceImport from "./service-import";
 import {
@@ -92,6 +95,7 @@ type Log = {
   ipAddress: string | null;
 };
 type Data = {
+  campaign: CampaignEntry[];
   user: { id: string; name: string; email: string; role: string };
   services: Service[];
   targets: TargetData[];
@@ -110,6 +114,7 @@ const nav: { label: string; items: [string, string, LucideIcon][] }[] = [
       ["Services", "services", CalendarDays],
       ["Attendance", "attendance", Users],
       ["Giving", "giving", Wallet],
+      ["Capital campaign", "capital-campaign", HeartHandshake],
     ],
   },
   {
@@ -864,9 +869,13 @@ export default function Workspace({ section }: { section: string }) {
             <div className="skeleton" />
           ) : (
             <>
-              {!["users", "audit-logs", "settings", "targets"].includes(
-                section,
-              ) && (
+              {![
+                "users",
+                "audit-logs",
+                "settings",
+                "targets",
+                "capital-campaign",
+              ].includes(section) && (
                 <div className="filter-bar">
                   <div className="filter-heading">
                     <SlidersHorizontal size={16} />
@@ -1051,7 +1060,7 @@ export default function Workspace({ section }: { section: string }) {
                       "vs. comparison",
                     )}
                   </div>
-                  <div className="dashboard-charts separate-trends">
+                  <div className="dashboard-charts separate-trends with-campaign">
                     <section className="panel">
                       <div className="panel-heading">
                         <div>
@@ -1086,7 +1095,47 @@ export default function Workspace({ section }: { section: string }) {
                         Giving in Philippine Peso (PHP)
                       </div>
                     </section>
+                    <CampaignSummary
+                      entries={data.campaign}
+                      month={end.slice(0, 7)}
+                    />
                   </div>
+                </>
+              )}
+              {section === "capital-campaign" && (
+                <>
+                  <div className="filter-bar">
+                    <label>
+                      Year
+                      <select
+                        aria-label="Campaign year"
+                        value={start.slice(0, 4)}
+                        onChange={(e) => {
+                          const range = periodWindow(
+                            `${e.target.value}-01-01`,
+                            "YEARLY",
+                          );
+                          setStart(range.start);
+                          setEnd(range.end);
+                        }}
+                      >
+                        {Array.from(
+                          new Set([
+                            Number(start.slice(0, 4)),
+                            ...data.campaign.map((e) => e.year),
+                          ]),
+                        )
+                          .sort((a, b) => b - a)
+                          .map((year) => (
+                            <option key={year}>{year}</option>
+                          ))}
+                      </select>
+                    </label>
+                  </div>
+                  <CapitalCampaign
+                    entries={data.campaign}
+                    year={Number(start.slice(0, 4))}
+                  />
                 </>
               )}
               {section.startsWith("analytics/") && (

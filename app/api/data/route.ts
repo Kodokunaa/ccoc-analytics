@@ -21,41 +21,54 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireUser();
     const section = req.nextUrl.searchParams.get("section");
-    const [services, targets, settings, users, logs] = await Promise.all([
-      db.service.findMany({
-        where: { deletedAt: null },
-        include: {
-          attendance: { include: { creator: { select: { name: true } } } },
-          giving: {
-            include: { creator: { select: { name: true } } },
-          },
-          creator: { select: { name: true } },
-        },
-        orderBy: { serviceDate: "desc" },
-      }),
-      db.target.findMany({ orderBy: { startDate: "desc" } }),
-      db.appSetting.findMany(),
-      user.role === "SUPER_ADMIN" && (!section || section === "users")
-        ? db.user.findMany({
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              status: true,
-              role: { select: { name: true } },
-              createdAt: true,
+    const [services, targets, settings, users, logs, campaign] =
+      await Promise.all([
+        db.service.findMany({
+          where: { deletedAt: null },
+          include: {
+            attendance: { include: { creator: { select: { name: true } } } },
+            giving: {
+              include: { creator: { select: { name: true } } },
             },
-            orderBy: { name: "asc" },
-          })
-        : [],
-      user.role === "SUPER_ADMIN" && (!section || section === "audit-logs")
-        ? db.auditLog.findMany({
-            include: { user: { select: { name: true } } },
-            orderBy: { createdAt: "desc" },
-            take: 500,
-          })
-        : [],
-    ]);
+            creator: { select: { name: true } },
+          },
+          orderBy: { serviceDate: "desc" },
+        }),
+        db.target.findMany({ orderBy: { startDate: "desc" } }),
+        db.appSetting.findMany(),
+        user.role === "SUPER_ADMIN" && (!section || section === "users")
+          ? db.user.findMany({
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                status: true,
+                role: { select: { name: true } },
+                createdAt: true,
+              },
+              orderBy: { name: "asc" },
+            })
+          : [],
+        user.role === "SUPER_ADMIN" && (!section || section === "audit-logs")
+          ? db.auditLog.findMany({
+              include: { user: { select: { name: true } } },
+              orderBy: { createdAt: "desc" },
+              take: 500,
+            })
+          : [],
+        !section || ["dashboard", "capital-campaign"].includes(section)
+          ? db.capitalCampaignEntry.findMany({
+              orderBy: [{ year: "asc" }, { month: "asc" }],
+              select: {
+                id: true,
+                year: true,
+                month: true,
+                label: true,
+                amount: true,
+              },
+            })
+          : [],
+      ]);
     return NextResponse.json(
       {
         user,
@@ -64,6 +77,7 @@ export async function GET(req: NextRequest) {
         settings: Object.fromEntries(settings.map((s) => [s.key, s.value])),
         users,
         logs,
+        campaign,
         mailConfigured:
           user.role === "SUPER_ADMIN" ? mailConfigured() : undefined,
       },

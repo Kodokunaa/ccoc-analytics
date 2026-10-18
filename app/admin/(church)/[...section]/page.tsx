@@ -6,6 +6,7 @@ const sections = [
   "services",
   "attendance",
   "giving",
+  "capital-campaign",
   "analytics/attendance",
   "analytics/financial",
   "reports",
