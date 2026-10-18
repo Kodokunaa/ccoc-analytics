@@ -67,6 +67,7 @@ Fixed findings:
 - PowerPoint rejects the raw-data scope at the API boundary. Attendance slide counts identify services with attendance rather than all services.
 - XLSX exports retain integer count formatting and two-decimal money formatting, preserve missing values and approved snapshots, and keep campaign amounts outside Sunday giving.
 - Staff PDF identifies comparison dates, uses readable grouped charts for long ranges, avoids overlapping value labels, and consistently displays monetary decimals.
+- Live verification found a production-only Prisma pool timeout in report previews: two full-year transparency loads ran concurrently against a one-connection pool. Report-source and workflow loads now avoid overlapping those query batches. This also protects monthly file generation, which uses the same source loader.
 
 Validation:
 

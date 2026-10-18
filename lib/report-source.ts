@@ -10,9 +10,10 @@ export async function reportSource(month: string) {
     return { ...snapshot, approved: true };
   }
   const year = Number(month.slice(0, 4));
-  const [data, previousYear] = await Promise.all([
-    getTransparency(year),
-    getTransparency(year - 1),
-  ]);
+  // The production pool intentionally has one connection. Each transparency
+  // load issues several queries; overlapping two loads exhausts its queue and
+  // can time out previews and monthly exports before any file is generated.
+  const data = await getTransparency(year);
+  const previousYear = await getTransparency(year - 1);
   return { data, previousYear, approved: false };
 }

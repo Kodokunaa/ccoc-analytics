@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
   try {
     const user = await requireUser();
     const month = monthSchema.parse(req.nextUrl.searchParams.get("month"));
-    const [data, approval, archives, artifacts] = await Promise.all([
-      getTransparency(Number(month.slice(0, 4))),
+    const data = await getTransparency(Number(month.slice(0, 4)));
+    const [approval, archives, artifacts] = await Promise.all([
       db.reportMonth.findUnique({
         where: { month },
         select: { month: true, approvedAt: true, approvedBy: true },
