@@ -98,6 +98,7 @@ async function backup() {
           "--dbname",
           database,
           "--format=custom",
+          "--schema=public",
           "--no-owner",
           "--no-privileges",
           "--snapshot",
@@ -194,6 +195,7 @@ async function restore(verify) {
       "--no-owner",
       "--no-privileges",
       "--exit-on-error",
+      "--schema=public",
       file,
     ]);
     const result = await run("psql", [

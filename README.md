@@ -12,6 +12,8 @@ Run migrations first, then `npm run db:seed:ledger -- --env-file=.env.production
 
 The supplied campaign items total PHP 61,100, while the handwritten total states PHP 61,150. The app displays this unresolved PHP 50 discrepancy without creating a balancing transaction. Prior-year savings total PHP 19,114, giving a calculated balance of PHP 80,214.
 
+Database backups and restores cover the app's `public` schema. Supabase-managed schemas and extensions are excluded so the app data can be verified in a temporary local PostgreSQL database.
+
 ## Application features
 
 - Responsive dashboard, collapsible mobile navigation, filters, search, tables, pagination, loading and empty states.
